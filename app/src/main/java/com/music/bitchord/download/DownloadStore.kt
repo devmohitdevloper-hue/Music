@@ -56,7 +56,7 @@ object DownloadStore {
     private const val TAG = "BitChord"
 
     /** The subfolder of Music that everything lands in. */
-    const val FOLDER = "BitChord"
+    const val FOLDER = "KUD Music"
 
     private val relativePath = "${Environment.DIRECTORY_MUSIC}/$FOLDER"
 
@@ -312,3 +312,4 @@ object DownloadStore {
     private fun privateFile(context: Context, name: String) =
         File(File(context.filesDir, "downloads"), name)
 }
+

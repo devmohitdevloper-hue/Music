@@ -52,7 +52,7 @@ import dev.chrisbanes.haze.materials.HazeMaterials
  * The transport buttons' touch target. Material's default 48dp is what a bar
  * this slim is really made of, so it sets the height on its own.
  */
-private val GLYPH_SLOT = 40.dp
+private val GLYPH_SLOT = 48.dp
 
 /**
  * The play and skip glyphs themselves.
@@ -63,7 +63,7 @@ private val GLYPH_SLOT = 40.dp
  * taller, which is not what a bigger glyph is being asked for. At 32 there is
  * still 4dp of clearance to the slot's edge on every side.
  */
-private val GLYPH_SIZE = 32.dp
+private val GLYPH_SIZE = 28.dp
 
 /** The spinner that stands in for the play glyph, kept in proportion to it. */
 private val SPINNER_SIZE = 22.dp
@@ -170,22 +170,13 @@ fun MiniPlayer(
     // height if the row's contents ever change it — which is what keeps a pill
     // a pill instead of a rounded rectangle. Same idiom as [FloatingBottomBar]
     // directly below it, so the two shapes are the same family.
-    val shape = RoundedCornerShape(percent = 50)
+    val shape = RoundedCornerShape(20.dp)
     Box(
         modifier = modifier
             .padding(horizontal = PAGE_GUTTER)
             .clip(shape)
-            .then(
-                if (reduceDynamicBlur) {
-                    Modifier.background(MaterialTheme.colorScheme.surface)
-                } else {
-                    Modifier.optimizedHazeEffect(
-                        state = hazeState,
-                        style = HazeMaterials.thin(MaterialTheme.colorScheme.surface),
-                    )
-                },
-            )
-            .border(0.5.dp, Color.White.copy(alpha = 0.10f), shape)
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.20f), shape)
             // Deliberately silent: the whole bar is the target, so it catches
             // stray taps meant for the page behind it, and the sheet rising is
             // its own confirmation. The glyphs on it still buzz.
@@ -248,12 +239,13 @@ fun MiniPlayer(
                         haptics.play(if (isPlaying) Haptic.Pause else Haptic.Resume)
                         onPlayPause()
                     },
-                    modifier = Modifier.size(GLYPH_SLOT),
+                    modifier = Modifier.size(GLYPH_SLOT).clip(RoundedCornerShape(16.dp))
+                        .background(MaterialTheme.colorScheme.primary),
                 ) {
                     Icon(
                         imageVector = if (isPlaying) Icons.Rounded.Pause else Icons.Rounded.PlayArrow,
                         contentDescription = stringResource(if (isPlaying) R.string.pause else R.string.play),
-                        tint = MaterialTheme.colorScheme.onBackground,
+                        tint = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier.size(GLYPH_SIZE),
                     )
                 }
@@ -276,3 +268,4 @@ fun MiniPlayer(
         }
     }
 }
+

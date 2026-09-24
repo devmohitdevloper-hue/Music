@@ -73,11 +73,10 @@ fun ExploreScreen(
             modifier = Modifier.fillMaxSize(),
         ) {
             item {
-                Text(
-                    text = stringResource(R.string.explore),
-                    style = MaterialTheme.typography.displayLarge,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    modifier = Modifier.padding(horizontal = PAGE_GUTTER, vertical = 8.dp),
+                com.music.bitchord.ui.components.KudPageHeader(
+                    eyebrow = stringResource(R.string.kud_discover),
+                    title = stringResource(R.string.kud_explore_title),
+                    subtitle = stringResource(R.string.kud_explore_subtitle),
                 )
             }
             when (state) {
@@ -134,8 +133,8 @@ private fun MoodGenreCard(
     val color = moodColor(item.title)
     Box(
         modifier = modifier
-            .height(100.dp)
-            .clip(RoundedCornerShape(8.dp))
+            .height(116.dp)
+            .clip(RoundedCornerShape(22.dp))
             .background(
                 Brush.linearGradient(
                     listOf(color, color.copy(red = color.red * .68f, green = color.green * .68f, blue = color.blue * .68f)),
@@ -196,8 +195,8 @@ private fun ExploreSkeleton() {
                 modifier = Modifier.padding(bottom = 12.dp),
             ) {
                 repeat(2) {
-                    Box(Modifier.weight(1f).height(100.dp).clip(RoundedCornerShape(8.dp))) {
-                        ShimmerBox(Modifier.fillMaxSize(), RoundedCornerShape(8.dp))
+                    Box(Modifier.weight(1f).height(116.dp).clip(RoundedCornerShape(22.dp))) {
+                        ShimmerBox(Modifier.fillMaxSize(), RoundedCornerShape(22.dp))
                         ShimmerBox(
                             Modifier
                                 .align(Alignment.BottomEnd)
@@ -250,3 +249,4 @@ fun MoodGenrePlaylistsScreen(
         }
     }
 }
+

@@ -109,6 +109,7 @@ fun HomeScreen(
     onLoadMore: (() -> Unit)? = null,
     loadingMore: Boolean = false,
     recentlyPlayedLoading: Boolean = false,
+    onMoodClick: ((String) -> Unit)? = null,
 ) {
     val recentsViewType by AppSettings.homeRecentsViewType.collectAsStateWithLifecycle()
 
@@ -123,13 +124,17 @@ fun HomeScreen(
             modifier = Modifier.fillMaxSize(),
             contentPadding = contentPadding,
         ) {
-            item {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.displayLarge,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    modifier = Modifier.padding(horizontal = PAGE_GUTTER, vertical = 8.dp),
+            item(key = "kud-home-header") {
+                com.music.bitchord.ui.components.KudPageHeader(
+                    eyebrow = "KUD MUSIC",
+                    title = stringResource(R.string.kud_home_title),
+                    subtitle = stringResource(R.string.kud_home_subtitle),
                 )
+            }
+            if (onMoodClick != null) {
+                item(key = "kud-moods") {
+                    com.music.bitchord.ui.components.KudMoodShortcuts(onSelect = onMoodClick)
+                }
             }
             if (!signedIn && onSignIn != null) {
                 item {
@@ -669,8 +674,8 @@ private fun HeroCard(
     Box(
         modifier = modifier
             .aspectRatio(HERO_CARD_RATIO)
-            .clip(RoundedCornerShape(18.dp))
-            .thumbnailBorder(RoundedCornerShape(18.dp))
+            .clip(RoundedCornerShape(24.dp))
+            .thumbnailBorder(RoundedCornerShape(24.dp))
             .background(MaterialTheme.colorScheme.surfaceVariant)
             .combinedClickable(onClick = onClick, onLongClick = onLongPress),
     ) {
@@ -680,13 +685,21 @@ private fun HeroCard(
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize(),
         )
+        Box(
+            Modifier.align(Alignment.TopEnd).padding(16.dp).size(42.dp)
+                .clip(CircleShape).background(com.music.bitchord.ui.theme.KudMint),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(BitChordIcons.Play, contentDescription = null,
+                tint = com.music.bitchord.ui.theme.KudInk, modifier = Modifier.size(22.dp))
+        }
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.BottomStart)
                 .background(
                     Brush.verticalGradient(
-                        listOf(Color.Transparent, Color.Black.copy(alpha = 0.78f)),
+                        listOf(Color.Transparent, Color(0xFF101813).copy(alpha = 0.96f)),
                     ),
                 )
                 .padding(start = 16.dp, end = 16.dp, top = 34.dp, bottom = 14.dp),
@@ -765,7 +778,7 @@ internal fun NewShelfCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(1f)
-                .clip(RoundedCornerShape(12.dp))
+                .clip(RoundedCornerShape(18.dp))
                 .background(MaterialTheme.colorScheme.surfaceVariant),
             contentAlignment = Alignment.Center,
         ) {
@@ -814,7 +827,7 @@ internal fun ShelfCard(
                     modifier = Modifier
                         .fillMaxWidth()
                         .aspectRatio(1f)
-                        .clip(RoundedCornerShape(12.dp)),
+                        .clip(RoundedCornerShape(18.dp)),
                     contentAlignment = Alignment.Center,
                 ) {
                     MeshGradientBackground(
@@ -837,7 +850,7 @@ internal fun ShelfCard(
                     modifier = Modifier
                         .fillMaxWidth()
                         .aspectRatio(1f)
-                        .clip(RoundedCornerShape(12.dp)),
+                        .clip(RoundedCornerShape(18.dp)),
                     contentAlignment = Alignment.Center,
                 ) {
                     MeshGradientBackground(
@@ -862,8 +875,8 @@ internal fun ShelfCard(
                     modifier = Modifier
                         .fillMaxWidth()
                         .aspectRatio(1f)
-                        .clip(RoundedCornerShape(12.dp))
-                        .thumbnailBorder(RoundedCornerShape(12.dp))
+                        .clip(RoundedCornerShape(18.dp))
+                        .thumbnailBorder(RoundedCornerShape(18.dp))
                         .background(MaterialTheme.colorScheme.surfaceVariant),
                 )
             }
@@ -901,3 +914,4 @@ internal fun ShelfCard(
         )
     }
 }
+

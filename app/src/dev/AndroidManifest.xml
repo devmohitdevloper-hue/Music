@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <application
-        android:label="BitChord Dev"
+        android:label="KUD Music"
         tools:replace="android:label" />
 </manifest>
+

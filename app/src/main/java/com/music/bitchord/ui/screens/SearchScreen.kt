@@ -151,6 +151,13 @@ fun SearchScreen(
         // clear it fully — status bar inset + bar height + breathing gap — so
         // the search field sits cleanly below the bar instead of overlapping it.
         Column(modifier = Modifier.padding(top = topBarContentPadding())) {
+            if (results == null && !suggesting) {
+                com.music.bitchord.ui.components.KudPageHeader(
+                    eyebrow = stringResource(R.string.kud_discover),
+                    title = stringResource(R.string.kud_search_title),
+                    subtitle = stringResource(R.string.kud_search_subtitle),
+                )
+            }
             SearchField(
                 query = query,
                 onQueryChange = onQueryChange,
@@ -194,10 +201,16 @@ fun SearchScreen(
                         )
                     }
                 }
-                results == null -> if (history.isEmpty()) {
-                    item { MessageState(stringResource(R.string.search_empty)) }
-                } else {
-                    recentSearches(history, onHistoryClick, onHistoryRemove, onHistoryClear)
+                results == null -> {
+                    item(key = "kud-browse") {
+                        com.music.bitchord.ui.components.KudBrowseGrid(onSelect = { term ->
+                            onHistoryClick(term)
+                            focusManager.clearFocus()
+                        })
+                    }
+                    if (history.isNotEmpty()) {
+                        recentSearches(history, onHistoryClick, onHistoryRemove, onHistoryClear)
+                    }
                 }
                 results is UiState.Loading -> songListSkeleton(circular = filter == SearchFilter.ARTISTS)
                 results is UiState.Error -> item { MessageState(results.message) }
@@ -732,3 +745,4 @@ private fun SearchFilterTabs(filter: SearchFilter, onFilterChange: (SearchFilter
 
 /** Rounded, but well short of a capsule — the corner reads as a cut, not a curve. */
 private val FILTER_PILL_SHAPE = RoundedCornerShape(12.dp)
+

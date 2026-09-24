@@ -2659,9 +2659,9 @@ fun NowPlayingScreen(
                             // the first. Only cast it once there's actually art.
                             .shadow(
                                 if (artLoaded) lerp(14.dp, 6.dp, p) else 0.dp,
-                                RoundedCornerShape(lerp(10.dp, 7.dp, p)),
+                                RoundedCornerShape(lerp(28.dp, 10.dp, p)),
                             )
-                            .clip(RoundedCornerShape(lerp(10.dp, 7.dp, p)))
+                            .clip(RoundedCornerShape(lerp(28.dp, 10.dp, p)))
                             .background(Color.Black.copy(alpha = 0.18f)),
                         contentAlignment = Alignment.Center,
                     ) {
@@ -6048,6 +6048,7 @@ private fun TransportGlyph(
     haptic: Haptic = Haptic.Tap,
 ) {
     val haptics = rememberHaptics()
+    val isPrimary = icon == R.drawable.ic_player_play || icon == R.drawable.ic_player_pause
     // Faded rather than hidden: the row keeps its shape at the ends of a queue.
     val alpha by animateFloatAsState(
         targetValue = if (enabled) 1f else 0.3f,
@@ -6056,6 +6057,8 @@ private fun TransportGlyph(
     Box(
         modifier = Modifier
             .size(touchSize)
+            .clip(androidx.compose.foundation.shape.CircleShape)
+            .background(if (isPrimary) com.music.bitchord.ui.theme.KudMint else Color.Transparent)
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
@@ -6069,8 +6072,8 @@ private fun TransportGlyph(
         Icon(
             painter = painterResource(icon),
             contentDescription = contentDescription,
-            tint = Color.White.copy(alpha = alpha),
-            modifier = Modifier.size(size),
+            tint = (if (isPrimary) com.music.bitchord.ui.theme.KudInk else Color.White).copy(alpha = alpha),
+            modifier = Modifier.size(if (isPrimary) size * 0.70f else size),
         )
     }
 }
@@ -7617,3 +7620,4 @@ private object OverlayBack {
         view.findOnBackInvokedDispatcher()?.unregisterOnBackInvokedCallback(callback)
     }
 }
+

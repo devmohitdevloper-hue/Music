@@ -22,28 +22,34 @@ import com.music.bitchord.R
 // spots (Replay's rank badge) that want that specific red regardless of theme.
 val AccentRed = Color(0xFFFA2D48)
 
+val KudMint = Color(0xFFB7F77A)
+val KudInk = Color(0xFF101813)
+
 private val DarkColors = darkColorScheme(
-    primary = Color.White,
-    onPrimary = Color.Black,
-    background = Color.Black,
-    onBackground = Color.White,
-    surface = Color(0xFF0D0D0F),
-    onSurface = Color.White,
-    surfaceVariant = Color(0xFF1C1C1E),
-    onSurfaceVariant = Color(0xFF8E8E93),
-    outline = Color(0xFF2C2C2E),
+    primary = KudMint, onPrimary = KudInk,
+    primaryContainer = Color(0xFF29452E), onPrimaryContainer = Color(0xFFD9FBC4),
+    secondary = Color(0xFF82D9CA), onSecondary = Color(0xFF072E28),
+    secondaryContainer = Color(0xFF20473E), onSecondaryContainer = Color(0xFFB3F1E2),
+    tertiary = Color(0xFFE9C596), onTertiary = Color(0xFF382A15),
+    background = Color(0xFF101513), onBackground = Color(0xFFF3F5EE),
+    surface = Color(0xFF19211D), onSurface = Color(0xFFF3F5EE),
+    surfaceVariant = Color(0xFF26322B), onSurfaceVariant = Color(0xFFB2BEB5),
+    surfaceContainer = Color(0xFF1D2821), surfaceContainerHigh = Color(0xFF29362D),
+    outline = Color(0xFF536459), outlineVariant = Color(0xFF334239),
+    error = Color(0xFFFFB4AB), onError = Color(0xFF690005),
 )
 
 private val LightColors = lightColorScheme(
-    primary = Color.Black,
-    onPrimary = Color.White,
-    background = Color.White,
-    onBackground = Color.Black,
-    surface = Color(0xFFF7F7F9),
-    onSurface = Color.Black,
-    surfaceVariant = Color(0xFFF2F2F7),
-    onSurfaceVariant = Color(0xFF6E6E73),
-    outline = Color(0xFFE5E5EA),
+    primary = Color(0xFF32652A), onPrimary = Color.White,
+    primaryContainer = Color(0xFFD0EFBC), onPrimaryContainer = Color(0xFF173313),
+    secondary = Color(0xFF25695D), onSecondary = Color.White,
+    secondaryContainer = Color(0xFFBDEBDD), onSecondaryContainer = Color(0xFF072E28),
+    tertiary = Color(0xFF78582F), onTertiary = Color.White,
+    background = Color(0xFFF4F6EE), onBackground = KudInk,
+    surface = Color(0xFFFCFDF7), onSurface = KudInk,
+    surfaceVariant = Color(0xFFE1E8DC), onSurfaceVariant = Color(0xFF4C5B50),
+    surfaceContainer = Color(0xFFEAF0E3), surfaceContainerHigh = Color(0xFFDFE7D7),
+    outline = Color(0xFF75836F), outlineVariant = Color(0xFFC4D0BE),
 )
 
 /**
@@ -61,8 +67,8 @@ val SFProDisplay = FontFamily(
 
 // Heavy, tight typography — the backbone of the Apple Music look.
 private val BitChordTypography = Typography(
-    displayLarge = TextStyle(fontWeight = FontWeight.W800, fontSize = 34.sp, letterSpacing = (-0.8).sp),
-    headlineLarge = TextStyle(fontWeight = FontWeight.W800, fontSize = 30.sp, letterSpacing = (-0.7).sp),
+    displayLarge = TextStyle(fontWeight = FontWeight.W800, fontSize = 36.sp, letterSpacing = (-0.8).sp),
+    headlineLarge = TextStyle(fontWeight = FontWeight.W800, fontSize = 32.sp, letterSpacing = (-0.7).sp),
     headlineMedium = TextStyle(fontWeight = FontWeight.W700, fontSize = 22.sp, letterSpacing = (-0.4).sp),
     titleLarge = TextStyle(fontWeight = FontWeight.W700, fontSize = 20.sp, letterSpacing = (-0.3).sp),
     titleMedium = TextStyle(fontWeight = FontWeight.W600, fontSize = 16.sp, letterSpacing = (-0.2).sp),
@@ -70,7 +76,7 @@ private val BitChordTypography = Typography(
     bodyMedium = TextStyle(fontWeight = FontWeight.W400, fontSize = 14.sp),
     labelMedium = TextStyle(fontWeight = FontWeight.W600, fontSize = 12.sp),
     labelSmall = TextStyle(fontWeight = FontWeight.W600, fontSize = 11.sp),
-).withFamily(SFProDisplay)
+).withFamily(FontFamily.SansSerif)
 
 /** Applies [family] to every style in the scale, so nothing is left on Roboto. */
 private fun Typography.withFamily(family: FontFamily) = Typography(
@@ -144,3 +150,4 @@ private fun findWindow(view: android.view.View): android.view.Window? {
     }
     return null
 }
+

@@ -63,8 +63,8 @@ fun SearchField(
         modifier = modifier
             .fillMaxWidth()
             // Fixed height prevents the row from growing when text is entered
-            .height(46.dp)
-            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(11.dp))
+            .height(56.dp)
+            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(18.dp))
             // Asymmetric: the magnifier is a button now and wants a real touch
             // target, so it's given the room by pulling the field's own start
             // padding in rather than by pushing the glyph and the text along.
@@ -132,3 +132,4 @@ fun SearchField(
         }
     }
 }
+

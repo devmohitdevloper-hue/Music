@@ -141,12 +141,18 @@ fun LibraryScreen(
             modifier = Modifier.fillMaxSize(),
             contentPadding = contentPadding,
         ) {
-            item {
-                Text(
-                    text = stringResource(R.string.library),
-                    style = MaterialTheme.typography.displayLarge,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    modifier = Modifier.padding(horizontal = PAGE_GUTTER, vertical = 8.dp),
+            item(key = "kud-library-header") {
+                com.music.bitchord.ui.components.KudPageHeader(
+                    eyebrow = stringResource(R.string.kud_collection),
+                    title = stringResource(R.string.kud_library_title),
+                    subtitle = stringResource(R.string.kud_library_subtitle),
+                )
+                com.music.bitchord.ui.components.KudLibraryActions(
+                    onDownloads = { onShelfItemClick(ShelfItem(
+                        title = "Downloads", subtitle = "", thumbnailUrl = null,
+                        videoId = null, browseId = "local:downloads",
+                    )) },
+                    onNewPlaylist = if (signedIn) onNewPlaylist else onSignIn,
                 )
             }
             // Drawn whether or not anything has been played: with nothing behind
@@ -524,3 +530,4 @@ private fun HomeShelf.sortedForLibrary(sort: LibrarySort): HomeShelf = when (sor
 
 /** The library feed whose cards are the account's own — see [PlaylistShelf]. */
 private const val PLAYLISTS = YtMusicRepository.PLAYLISTS_SHELF
+

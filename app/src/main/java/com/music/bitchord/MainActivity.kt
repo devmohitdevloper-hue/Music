@@ -843,7 +843,7 @@ private fun BitChordApp(
     // reads [scrolled] — which made the whole floating bar, both of its states
     // and every glass surface on them recompose once per frame for the length of
     // a fold. Keyed on the labels so a locale change still rebuilds it.
-    val playLabel = stringResource(R.string.play)
+    val playLabel = stringResource(R.string.kud_home)
     val exploreLabel = stringResource(R.string.explore)
     val libraryLabel = stringResource(R.string.library)
     val searchLabel = stringResource(R.string.search)
@@ -2429,6 +2429,10 @@ private fun BitChordApp(
                             onLoadMore = viewModel::loadMoreHome,
                             loadingMore = homeLoadingMore,
                             recentlyPlayedLoading = homeRecentlyPlayedLoading,
+                            onMoodClick = { term ->
+                                viewModel.searchFor(term)
+                                selectedTab = TAB_SEARCH
+                            },
                         )
                         TAB_EXPLORE -> selectedMoodGenre?.let { category ->
                             MoodGenrePlaylistsScreen(
@@ -3897,3 +3901,4 @@ private const val TAB_SEARCH = 3
  * prefix has to be the one thing both the writing and the reading agree on.
  */
 private const val TAB_KEY = "tab:"
+

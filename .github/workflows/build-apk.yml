@@ -1,47 +1,66 @@
-name: Build BitChord APK
+name: Build KUD Music APK
 on:
   push:
     branches: [main]
   workflow_dispatch:
 permissions:
-  contents: write
+  contents: read
 concurrency:
-  group: bitchord-apk
-  cancel-in-progress: false
+  group: kud-music-apk
+  cancel-in-progress: true
 jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
-      - name: Import exact source version from uploaded ZIP
-        if: hashFiles('settings.gradle.kts') == ''
-        shell: bash
-        run: |
-          set -euo pipefail
-          source_dir="$(mktemp -d)"
-          curl --fail --location --retry 3 https://codeload.github.com/kushagrasinghx/BitChord/tar.gz/42712cb7c1c0632c4bda54558d65a7016b5ce790 | tar xz -C "$source_dir" --strip-components=1
-          rsync -a --exclude='.git/' --exclude='.github/workflows/' "$source_dir/" ./
-          printf '%s\n' 'Source: https://github.com/kushagrasinghx/BitChord' 'Commit: 42712cb7c1c0632c4bda54558d65a7016b5ce790' 'Imported from the version supplied in BitChord-main.zip. Original GPLv3 license retained.' > SOURCE-ORIGIN.txt
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add .
-          git commit -m "Import BitChord source matching supplied ZIP"
-          git push origin HEAD:main
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
+      - uses: actions/cache@v4
+        with:
+          path: ~/.android/debug.keystore
+          key: kud-music-debug-signing-v1
       - uses: android-actions/setup-android@v3
         with:
           packages: platform-tools
-      - name: Install Android SDK and native tools
+      - name: Install Android build tools
         run: sdkmanager "platforms;android-36" "build-tools;35.0.0" "ndk;27.0.12077973" "cmake;3.22.1"
-      - name: Build installable debug APK
+      - name: Build KUD Music
         run: bash gradlew :app:assembleDevDebug --no-daemon --stacktrace
+      - name: Verify APK signature
+        run: $ANDROID_HOME/build-tools/35.0.0/apksigner verify --verbose app/build/outputs/apk/dev/debug/app-dev-arm64-v8a-debug.apk
       - uses: actions/upload-artifact@v4
         with:
-          name: BitChord-installable-APK
-          path: app/build/outputs/apk/dev/debug/*.apk
+          name: KUD-Music-Android-ARM64
+          path: app/build/outputs/apk/dev/debug/*arm64-v8a*.apk
           if-no-files-found: error
-          retention-days: 14
+          retention-days: 30
+      - uses: actions/upload-artifact@v4
+        with:
+          name: KUD-Music-Universal
+          path: app/build/outputs/apk/dev/debug/*universal*.apk
+          if-no-files-found: error
+          retention-days: 30
+      - name: Enable emulator acceleration
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: UI smoke check
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          arch: x86_64
+          target: google_apis
+          profile: pixel_2
+          disable-animations: true
+          script: python3 scripts/ui-smoke.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: KUD-Music-UI-Checks
+          path: qa/
+          if-no-files-found: warn
+          retention-days: 30

@@ -97,7 +97,7 @@ fun Modifier.thumbnailBorder(shape: Shape): Modifier = composed {
  * below them rather than stepping in from them. One constant, shared by the
  * bars and the pages, is what keeps that true.
  */
-val PAGE_GUTTER = 10.dp
+val PAGE_GUTTER = 20.dp
 
 /** Where a divider under a track row starts: clear of the 52dp of artwork. */
 val ROW_DIVIDER_INSET = PAGE_GUTTER + 68.dp
@@ -125,7 +125,7 @@ val FLOATING_BAR_MAX_WIDTH = 440.dp
  * Sized so a phone-width row shows two cards whole with the edge of a third
  * showing: enough to say the row scrolls without a card being half a card.
  */
-val SHELF_CARD_WIDTH = 150.dp
+val SHELF_CARD_WIDTH = 164.dp
 
 /** A song title with the catalogue-standard outlined E for explicit audio. */
 @Composable
@@ -159,7 +159,7 @@ fun ExplicitSongTitle(
 }
 
 /** Share of the row a lead-shelf card takes, so the next one peeks in past it. */
-private const val HERO_CARD_FRACTION = 0.70f
+private const val HERO_CARD_FRACTION = 0.84f
 
 /**
  * How wide a lead-shelf card is ever allowed to get.
@@ -176,7 +176,7 @@ private const val HERO_CARD_FRACTION = 0.70f
 private val HERO_CARD_MAX_WIDTH = 320.dp
 
 /** A lead-shelf card's proportions: a touch taller than it is wide. */
-const val HERO_CARD_RATIO = 0.92f
+const val HERO_CARD_RATIO = 1.30f
 
 /**
  * How wide a lead-shelf card should be in a row [available] wide — the shared
@@ -771,3 +771,4 @@ fun PillTextField(
         )
     }
 }
+
