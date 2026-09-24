@@ -1,0 +1,3 @@
+Source: https://github.com/kushagrasinghx/BitChord
+Commit: 42712cb7c1c0632c4bda54558d65a7016b5ce790
+Imported from the version supplied in BitChord-main.zip. Original GPLv3 license retained.
