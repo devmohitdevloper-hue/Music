@@ -1,0 +1,45 @@
+name: Build BitChord APK
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: bitchord-apk
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Import exact source version from uploaded ZIP
+        if: hashFiles('settings.gradle.kts') == ''
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_dir="$(mktemp -d)"
+          curl --fail --location --retry 3 https://codeload.github.com/kushagrasinghx/BitChord/tar.gz/42712cb7c1c0632c4bda54558d65a7016b5ce790 | tar xz -C "$source_dir" --strip-components=1
+          rsync -a --exclude='.git/' --exclude='.github/workflows/' "$source_dir/" ./
+          printf '%s\n' 'Source: https://github.com/kushagrasinghx/BitChord' 'Commit: 42712cb7c1c0632c4bda54558d65a7016b5ce790' 'Imported from the version supplied in BitChord-main.zip. Original GPLv3 license retained.' > SOURCE-ORIGIN.txt
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .
+          git commit -m "Import BitChord source matching supplied ZIP"
+          git push origin HEAD:main
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - name: Install Android SDK and native tools
+        run: sdkmanager "platforms;android-36" "build-tools;35.0.0" "ndk;27.0.12077973" "cmake;3.22.1"
+      - name: Build installable debug APK
+        run: bash gradlew :app:assembleDevDebug --no-daemon --stacktrace
+      - uses: actions/upload-artifact@v4
+        with:
+          name: BitChord-installable-APK
+          path: app/build/outputs/apk/dev/debug/*.apk
+          if-no-files-found: error
+          retention-days: 14
