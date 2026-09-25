@@ -3,7 +3,13 @@ import pathlib,re,subprocess,time,xml.etree.ElementTree as ET
 out=pathlib.Path('qa');out.mkdir(exist_ok=True)
 pkg='com.kud.music.dev'
 def adb(*args,check=True):
- return subprocess.run(['adb',*args],check=check,capture_output=True).stdout
+ result=subprocess.run(['adb',*args],capture_output=True,timeout=90)
+ if check and result.returncode:
+  diagnostic=result.stdout.decode(errors='replace')+result.stderr.decode(errors='replace')
+  (out/'adb-failure.txt').write_text(diagnostic)
+  print(diagnostic,flush=True)
+  result.check_returncode()
+ return result.stdout
 
 def dump():
  adb('shell','uiautomator','dump','/sdcard/kud-window.xml')
