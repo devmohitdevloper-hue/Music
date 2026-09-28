@@ -17,8 +17,8 @@ jobs:
           java-version: '17'
       - uses: actions/cache@v4
         with:
-          path: ~/.android/debug.keystore
-          key: moviesansar-debug-signing-v1
+          path: .signing/debug.keystore
+          key: moviesansar-explicit-debug-signing-v2
       - uses: android-actions/setup-android@v3
         with:
           packages: platform-tools
@@ -41,6 +41,12 @@ jobs:
           name: Movie-Sansar-v8-Layout-Checks
           path: qa/
           if-no-files-found: ignore
+      - name: Prepare persistent debug signing key
+        run: |
+          mkdir -p .signing
+          if [ ! -f .signing/debug.keystore ]; then
+            keytool -genkeypair -keystore .signing/debug.keystore -storepass android -alias androiddebugkey -keypass android -dname "CN=Movie Sansar Debug,O=Movie Sansar,C=IN" -keyalg RSA -keysize 2048 -validity 10000
+          fi
       - name: Build installable debug APK
         run: gradle -p android --no-daemon assembleDebug
       - name: Verify signed APK and packaged assets
