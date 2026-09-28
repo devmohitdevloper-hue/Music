@@ -1,7 +1,7 @@
 name: Inspect live player integrations
 on:
   push:
-    paths: ['tests/probe.cjs', '.github/workflows/probe-players.yml']
+    paths: ['diagnostics/**', 'tests/probe.cjs', '.github/workflows/probe-players.yml']
 permissions:
   contents: read
 jobs:
@@ -12,7 +12,8 @@ jobs:
       - uses: actions/checkout@v4
       - run: npm install --no-save playwright@1.58.2
       - run: npx playwright install --with-deps chromium
-      - run: node tests/probe.cjs
+      - run: python3 scripts/update-ad-filter.py
+      - run: node diagnostics/candidates.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
