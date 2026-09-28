@@ -1,9 +1,9 @@
 const {chromium}=require('playwright'),fs=require('fs'),http=require('http');
 const hosts=new Set(fs.readFileSync('ad-hosts.txt','utf8').split('\n').filter(s=>s&&!s.startsWith('#')).map(s=>s.trim().split(/\s+/)).map(a=>a.length>1?a[1]:a[0]));
 function blocked(h){while(h){if(hosts.has(h))return true;const i=h.indexOf('.');if(i<0)break;h=h.slice(i+1)}return false}
-const server=http.createServer((req,res)=>{res.setHeader('Content-Type','text/html');res.end('<html><body style="margin:0;background:black"><iframe id="player" style="width:960px;height:540px;border:0" allow="autoplay;fullscreen;encrypted-media" sandbox="allow-scripts allow-same-origin allow-presentation allow-orientation-lock"></iframe></body></html>')});
+const server=http.createServer((req,res)=>{res.setHeader('Content-Type','text/html');res.end('<html><body style="margin:0;background:black"><iframe id="player" referrerpolicy="no-referrer" style="width:960px;height:540px;border:0" allow="autoplay;fullscreen;encrypted-media" sandbox="allow-scripts allow-same-origin allow-presentation allow-orientation-lock"></iframe></body></html>')});
 (async()=>{await new Promise(r=>server.listen(8126,'127.0.0.1',r));fs.mkdirSync('qa-live',{recursive:true});const b=await chromium.launch();const report=[];
-for(const [name,url] of [['vidsrc-tv','https://vidsrc.sh/embed/tv/1399/1/2'],['vidsrc-movie','https://vidsrc.sh/embed/movie/1726'],['filmu-movie','https://embed.filmu.in/movie/1726']]){
+for(const [name,url] of [['ezvid-tv','https://ezvidapi.com/embed/tv/1399/1/2'],['ezvid-movie','https://ezvidapi.com/embed/movie/1726'],['vidcore-movie','https://vidcore.io/movie/1726?autoPlay=false']]){
  const c=await b.newContext({viewport:{width:980,height:600},serviceWorkers:'block'});await c.addInitScript({content:'window.__MS_TOKEN="candidate-test";'+fs.readFileSync('js/player-guard.js','utf8')});const p=await c.newPage();const row={name,url,blocked:[],popups:0,errors:[]};c.on('page',x=>{row.popups++;x.close().catch(()=>{})});
  await c.route('**/*',r=>{const u=new URL(r.request().url());if(blocked(u.hostname)){row.blocked.push(u.hostname);return r.abort()}return r.continue()});
  try{await p.goto('http://127.0.0.1:8126');const start=Date.now();await p.locator('#player').evaluate((f,u)=>f.src=u,url);await p.waitForTimeout(9000);row.frames=p.frames().map(f=>f.url());row.text=[];
