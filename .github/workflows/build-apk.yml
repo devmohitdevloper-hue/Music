@@ -1,17 +1,14 @@
-name: Build KUD Music APK
+name: Build Movie Sansar APK
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
+  push:
+    paths: ['android/**', 'js/**', 'css/**', '*.html', 'ad-hosts.txt', '.github/workflows/build-apk.yml']
 permissions:
   contents: read
-concurrency:
-  group: kud-music-apk
-  cancel-in-progress: true
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -21,59 +18,29 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: ~/.android/debug.keystore
-          key: kud-music-debug-signing-v1
+          key: moviesansar-debug-signing-v1
       - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
         with:
-          packages: platform-tools
-      - name: Install Android build tools
-        run: sdkmanager "platforms;android-36" "build-tools;35.0.0" "ndk;27.0.12077973" "cmake;3.22.1"
-      - name: Build KUD Music
-        run: bash gradlew :app:assembleDevDebug --no-daemon --stacktrace
-      - name: Verify APK signature
-        run: $ANDROID_HOME/build-tools/35.0.0/apksigner verify --verbose app/build/outputs/apk/dev/debug/app-dev-arm64-v8a-debug.apk
-      - uses: actions/upload-artifact@v4
-        with:
-          name: KUD-Music-Android-ARM64
-          path: app/build/outputs/apk/dev/debug/*arm64-v8a*.apk
-          if-no-files-found: error
-          retention-days: 30
-      - uses: actions/upload-artifact@v4
-        with:
-          name: KUD-Music-Universal
-          path: app/build/outputs/apk/dev/debug/*universal*.apk
-          if-no-files-found: error
-          retention-days: 30
-      - name: Release build resources before emulator
+          gradle-version: '8.9'
+      - name: Install Android SDK
+        run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
+      - name: Check JavaScript
+        run: node tests/runtime.cjs
+      - name: Build installable debug APK
+        run: gradle -p android --no-daemon assembleDebug
+      - name: Verify signed APK and packaged assets
         run: |
-          bash gradlew --stop
-          sudo swapoff -a
-          sudo fallocate -l 4G /swapfile-kud
-          sudo chmod 600 /swapfile-kud
-          sudo mkswap /swapfile-kud
-          sudo swapon /swapfile-kud
-          free -h
-      - name: Enable emulator acceleration
-        run: |
-          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-          sudo udevadm control --reload-rules
-          sudo udevadm trigger --name-match=kvm
-      - name: UI smoke check
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: 35
-          arch: x86_64
-          target: google_apis
-          profile: pixel_2
-          ram-size: 1536M
-          heap-size: 256M
-          cores: 2
-          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none -memory 1536
-          disable-animations: true
-          script: python3 scripts/ui-smoke.py
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose android/app/build/outputs/apk/debug/app-debug.apk
+          python3 - <<'PYCODE'
+          import zipfile
+          with zipfile.ZipFile("android/app/build/outputs/apk/debug/app-debug.apk") as z:
+              files=set(z.namelist())
+              assert {"classes.dex", "assets/movies.html", "assets/js/watch.js", "assets/ad-hosts.txt"} <= files
+              assert not any("study.html" in f or "music.html" in f for f in files)
+          PYCODE
       - uses: actions/upload-artifact@v4
-        if: always()
         with:
-          name: KUD-Music-UI-Checks
-          path: qa/
-          if-no-files-found: warn
-          retention-days: 30
+          name: Movie-Sansar-v7-APK
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error

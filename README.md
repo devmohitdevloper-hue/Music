@@ -1,20 +1,14 @@
-# KUD Music
+# Movie Sansar v7
 
-An Android music app customized for Ashutosh, built on the open-source BitChord project.
+Movies and web series app with local Android WebView assets, cached TMDB metadata, restricted player pop-ups and known ad-domain blocking.
 
-## Version 2.0 redesign
+- Study/Music sections and app-owned player loading overlay removed.
+- Android 8+; no advertising SDKs; only Internet permission.
+- Third-party player availability and same-origin/video ads are outside the app’s full control.
 
-- Charcoal and mint palette, with a matching light theme.
-- KUD launcher icon, wordmark, app label and distinct package identity.
-- Editorial Home with functional mood searches and wide artwork cards.
-- Search mood tiles, Library action buttons and a four-tab navigation dock.
-- Rounded mini player and mint play/pause control.
-- English and Hindi text for the new screens.
+## Build
+GitHub Actions builds an installable signed debug APK and checks its signature and bundled assets. Download **Movie-Sansar-v7-APK** from the latest successful run.
 
-Build: `bash gradlew :app:assembleDevDebug`. The GitHub Actions workflow creates installable APKs and performs emulator smoke checks.
+Local: JDK 17, Gradle 8.9, SDK 35; run `gradle -p android assembleDebug`.
 
-The new package is `com.kud.music.dev`; it installs alongside the previous BitChord Dev app. Existing app data is not migrated. This is a debug/test build, not a Play Store release. Music availability still depends on the underlying providers.
-
-## Credits and license
-
-Based on [BitChord](https://github.com/kushagrasinghx/BitChord) by Kushagra Singh and contributors, at commit `42712cb7c1c0632c4bda54558d65a7016b5ce790`. Original source and attribution are retained. Distributed under GPLv3; see LICENSE. KUD customization changes the branding and interface and does not claim authorship of the original music engine.
+The old KUD Music project was replaced at the owner’s request. Earlier commits retain its history.

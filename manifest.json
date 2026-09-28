@@ -1,0 +1,17 @@
+{
+  "name": "Movie Sansar \u2014 Movies & Series",
+  "short_name": "Movie Sansar",
+  "start_url": "movies.html",
+  "display": "standalone",
+  "background_color": "#07090e",
+  "theme_color": "#07090e",
+  "description": "Movie Sansar entertainment hub by Mohit Mishra.",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
