@@ -20,6 +20,9 @@ jobs:
           path: ~/.android/debug.keystore
           key: moviesansar-debug-signing-v1
       - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+          log-accepted-android-sdk-licenses: false
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
