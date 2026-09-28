@@ -70,3 +70,8 @@ const searchInput=document.getElementById("search"),searchBtn=document.getElemen
 const sentinel=document.getElementById("loadMoreSentinel");if("IntersectionObserver" in window)new IntersectionObserver(es=>{if(es.some(e=>e.isIntersecting))loadMore()},{rootMargin:"250px 0px"}).observe(sentinel);else window.addEventListener("scroll",()=>{if(innerHeight+scrollY>=document.body.offsetHeight-1200)loadMore()},{passive:true});
 document.addEventListener("visibilitychange",()=>{if(document.hidden)clearInterval(heroTimer);else resetHeroTimer()});
 load(CATS[0]);
+
+// Landscape categories live above the hero, so no page or sideways scroll is needed.
+const categoryLayout=matchMedia('(orientation: landscape)');
+function placeCategories(){const chips=document.getElementById('chips');if(categoryLayout.matches)document.getElementById('hero').before(chips);else document.getElementById('content').insertBefore(chips,document.getElementById('grid'));}
+categoryLayout.addEventListener('change',placeCategories);placeCategories();
