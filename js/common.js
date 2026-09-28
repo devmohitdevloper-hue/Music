@@ -88,7 +88,9 @@ const STREAM_SERVERS={
  server1:{label:"Server 1",sandbox:"allow-scripts allow-same-origin allow-forms allow-presentation allow-orientation-lock",
   buildUrl:(type,id,s,e)=>type==="movie"?`https://screenscape.me/embed?tmdb=${id}&type=movie`:`https://screenscape.me/embed?tmdb=${id}&type=tv&s=${s}&e=${e}`},
  server2:{label:"Server 2",sandbox:"allow-scripts allow-same-origin allow-forms allow-presentation allow-orientation-lock",
-  buildUrl:(type,id,s,e)=>type==="movie"?`https://nxsha.space/embed/movie/${id}?color=purple`:`https://nxsha.space/embed/tv/${id}?s=${s}&e=${e}&color=purple`},
+  buildUrl:(type,id,s,e)=>type==="movie"?`https://nxsha.space/embed/movie/${id}?disable_app_ad=true&disable_dl_button=true`:`https://nxsha.space/embed/tv/${id}/${s}/${e}?disable_app_ad=true&disable_dl_button=true`},
+ experimental:{label:"Experimental • VidLink (test)",experimental:true,
+  buildUrl:(type,id,s,e)=>type==="movie"?`https://vidlink.pro/movie/${id}?autoplay=false&nextbutton=false`:`https://vidlink.pro/tv/${id}/${s}/${e}?autoplay=false&nextbutton=false`},
  server3:{label:"Server 3 • Owner CDN",sandbox:"allow-scripts allow-same-origin allow-forms allow-presentation allow-orientation-lock",
   buildUrl:(type,id,s,e)=>{
     if(!AUTHORIZED_STREAM_BASE)return "about:blank";

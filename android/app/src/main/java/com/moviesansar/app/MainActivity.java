@@ -9,6 +9,8 @@ import android.view.WindowInsets;
 import android.webkit.*;
 import androidx.webkit.WebViewCompat;
 import androidx.webkit.WebViewFeature;
+import androidx.webkit.ServiceWorkerControllerCompat;
+import androidx.webkit.ServiceWorkerClientCompat;
 import org.json.JSONObject;
 import android.widget.FrameLayout;
 import java.io.*;
@@ -46,7 +48,9 @@ public class MainActivity extends Activity {
  @Override public void onCreate(Bundle state){
   super.onCreate(state);
   try(BufferedReader r=new BufferedReader(new InputStreamReader(getAssets().open("ad-hosts.txt")))){
-   String line;while((line=r.readLine())!=null){line=line.trim();if(!line.isEmpty()&&!line.startsWith("#"))blockedHosts.add(line.toLowerCase(Locale.ROOT));}
+   String line;while((line=r.readLine())!=null){line=line.trim();if(line.isEmpty()||line.startsWith("#"))continue;
+    String[] columns=line.split("\\s+");String host=columns.length>1?columns[1]:columns[0];
+    if(host.indexOf('.')>0&&!host.equals("localhost")&&!host.equals("0.0.0.0"))blockedHosts.add(host.toLowerCase(Locale.ROOT));}
   }catch(IOException ignored){}
   root=new FrameLayout(this);root.setBackgroundColor(Color.rgb(7,9,14));setContentView(root);
   root.setOnApplyWindowInsetsListener((v,insets)->{
@@ -67,11 +71,19 @@ public class MainActivity extends Activity {
    @Override public boolean shouldOverrideUrlLoading(WebView v,WebResourceRequest r){
     Uri u=r.getUrl();if(blocked(u))return true;
     if(r.isForMainFrame())return !local(u);
+    // Gesture navigation inside a third-party frame is not an app navigation.
+    if(r.hasGesture())return true;
     return !("https".equals(u.getScheme())||"about".equals(u.getScheme()));
    }
   });
+  if(WebViewFeature.isFeatureSupported(WebViewFeature.SERVICE_WORKER_BASIC_USAGE)){
+   ServiceWorkerControllerCompat.getInstance().setServiceWorkerClient(new ServiceWorkerClientCompat(){
+    @Override public WebResourceResponse shouldInterceptRequest(WebResourceRequest request){return intercept(request.getUrl());}
+   });
+  }
   web.setWebChromeClient(new WebChromeClient(){
-   // Multiple windows enabled + no onCreateWindow implementation discards pop-ups.
+   @Override public boolean onCreateWindow(WebView v,boolean dialog,boolean gesture,android.os.Message message){return false;}
+   @Override public void onPermissionRequest(PermissionRequest request){request.deny();}
    @Override public boolean onJsAlert(WebView v,String u,String message,JsResult result){result.cancel();return true;}
    @Override public boolean onJsConfirm(WebView v,String u,String message,JsResult result){result.cancel();return true;}
    @Override public boolean onJsPrompt(WebView v,String u,String message,String d,JsPromptResult result){result.cancel();return true;}

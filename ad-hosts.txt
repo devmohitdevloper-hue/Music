@@ -26,3 +26,7 @@ effectivegatecpm.com
 effectivecpmrate.com
 realsrv.com
 ad.a-ads.com
+
+# Observed in the live Server 2 player on 2026-09-28
+cosedcost.com
+chebogrevets.com

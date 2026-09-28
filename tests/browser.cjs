@@ -9,7 +9,7 @@ const server=http.createServer((req,res)=>{const f=path.join(root,new URL(req.ur
  let data={results:[{id:101,name:'Test Series',title:'Test Movie',vote_average:8,poster_path:'/test.jpg',vote_count:500}],page:1,total_pages:1};
  if(/\/(movie|tv)\/101$/.test(u.pathname))data={id:101,title:'Test Movie',name:'Test Series',overview:'Test',seasons:[{season_number:1,episode_count:3}]};
  if(u.pathname.includes('/season/'))data={episodes:[{},{},{}]};return r.fulfill({json:data});}
- if(/screenscape.me|nxsha.space/.test(u.hostname))return r.fulfill({contentType:'text/html',body:'<video id="video"></video><div class="ad-overlay">ADVERTISEMENT</div><button id="popup" onclick="window.open(\'https://ads.example\')">Popup</button>'});
+ if(/screenscape.me|nxsha.space|vidlink.pro/.test(u.hostname))return r.fulfill({contentType:'text/html',body:'<video id="video"></video><a id="redirect" href="https://ads.example" target="_self">Ad redirect</a><div class="ad-overlay">ADVERTISEMENT</div><button id="popup" onclick="window.open(\'https://ads.example\')">Popup</button>'});
  return r.abort();});
  fs.mkdirSync('qa',{recursive:true});
  for(const size of [{width:390,height:844},{width:844,height:390},{width:1280,height:800},{width:1920,height:1080}]){
@@ -27,7 +27,23 @@ const server=http.createServer((req,res)=>{const f=path.join(root,new URL(req.ur
  assert.equal(await frame.locator('.ad-overlay').count(),0);assert.equal(await frame.evaluate(()=>window.open('https://ads.example')),null);
  await page.goto('http://127.0.0.1:8123/series.html');await page.locator('.bottom-nav [data-action="library"]').click();await page.waitForSelector('#libraryPanel.open');assert((await page.locator('#libraryList').innerText()).includes('2:07'));await page.locator('#libraryList a').first().click();
  await page.waitForSelector('[data-e="3"]');frame=page.frames().find(f=>f.url().includes('nxsha.space'));await frame.waitForSelector('video');await mockVideo(frame);await frame.waitForFunction(()=>window.testTime===127);
- assert((await page.locator('#frame').getAttribute('src')).includes('e=2'));
- await page.screenshot({path:'qa/resume.png'});assert.deepEqual(errors,[]);console.log('PASS: 4 viewport layouts, category wrapping, history, position capture, resume at 127s, episode/server persistence, popup and ad overlay removal.');
+ assert((await page.locator('#frame').getAttribute('src')).includes('/1/2?'));
+ const frameName=await page.locator('#frame').getAttribute('name');
+ await page.locator('#topEpisode').selectOption('3');
+ await page.waitForFunction(()=>document.querySelector('#frame').src.includes('/1/3?'));
+ assert.notEqual(await page.locator('#frame').getAttribute('name'),frameName,'episode switch must replace browsing context');
+ frame=page.frames().find(f=>f.url().includes('/1/3?'));await frame.waitForSelector('video');
+ const before=frame.url();await frame.locator('#redirect').click();await frame.locator('#popup').click();await page.waitForTimeout(150);
+ assert.equal(frame.url(),before);assert.equal(page.context().pages().length,1);
+ await mockVideo(frame);await frame.waitForTimeout(100);assert.equal(await frame.evaluate(()=>window.testTime),0,'new episode must not inherit old position');
+ assert.equal(await page.locator('#experimentalToggle').isChecked(),false);assert.equal(await page.locator('#server option[value="experimental"]').count(),0);
+ await page.locator('#experimentalToggle').check();await page.locator('#server').selectOption('experimental');
+ await page.waitForFunction(()=>document.querySelector('#frame').src.includes('vidlink.pro/tv/101/1/3'));
+ assert((await page.locator('#playerStatus').textContent()).includes('Experimental'));
+ await page.locator('#experimentalToggle').uncheck();assert.equal(await page.locator('#server').inputValue(),'server1');
+ await page.locator('#topEpisode').selectOption('1');assert((await page.locator('#frame').getAttribute('src')).includes('e=1'));
+ await page.locator('#server').selectOption('server2');assert((await page.locator('#frame').getAttribute('src')).includes('/1/1?'));
+ await page.reload();assert.equal(await page.locator('#experimentalToggle').isChecked(),false);
+ await page.screenshot({path:'qa/resume.png'});assert.deepEqual(errors,[]);console.log('PASS: 4 viewport layouts, category wrapping, history, position capture, resume at 127s, episode/server persistence, popup and ad overlay removal, redirect blocking, fresh browsing context, episode changes on both servers, experimental opt-in/off.');
  await browser.close();server.close();
 })().catch(e=>{console.error(e);server.close();process.exit(1)});

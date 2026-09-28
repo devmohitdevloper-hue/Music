@@ -2,10 +2,15 @@
 (()=>{
  if(window===window.top)return;
  const token=window.__MS_TOKEN;
+ // Server 2 exposes these switches for its direct-link advertisement.
+ if(location.hostname==='nxsha.space'||location.hostname.endsWith('.nxsha.space')){
+  try{localStorage.setItem('nxsha_direct_link_ad_enabled','0');sessionStorage.setItem('nxsha_direct_link_ad_dismissed','1')}catch(e){}
+ }
  try{Object.defineProperty(window,'open',{value:()=>null,writable:false,configurable:false})}catch(e){window.open=()=>null}
- const adSelectors='[data-ad-slot],[data-ad-client],.adsbygoogle,.ad-container,.ad-overlay,.advertisement,#ad-container,#ad-overlay,iframe[src*="doubleclick.net"],iframe[src*="popads.net"],iframe[src*="googlesyndication.com"]';
+ const adSelectors='[data-ad-slot],[data-ad-client],.adsbygoogle,.ad-container,.ad-overlay,.advertisement,.ad-banner,.banner-ad,.popup-ad,.popunder,.vast-ad,[aria-label="Advertisement"],[aria-label="advertisement"],#ad-container,#ad-overlay,iframe[src*="doubleclick.net"],iframe[src*="popads.net"],iframe[src*="googlesyndication.com"]';
  function clean(){document.querySelectorAll(adSelectors).forEach(el=>{el.remove()})}
- document.addEventListener('click',e=>{const a=e.target.closest?.('a');if(a&&(a.target==='_blank'||/^(intent:|market:)/i.test(a.href))){e.preventDefault();e.stopImmediatePropagation()}},true);
+ document.addEventListener('click',e=>{const a=e.target.closest?.('a');if(a&&a.getAttribute('href')&&!a.getAttribute('href').startsWith('#')){e.preventDefault();e.stopImmediatePropagation()}},true);
+ document.addEventListener('submit',e=>{e.preventDefault();e.stopImmediatePropagation()},true);
  const attached=new WeakSet();let scheduled=false;
  function scan(){scheduled=false;clean();document.querySelectorAll('video').forEach(attach)}
  function schedule(){if(!scheduled){scheduled=true;requestAnimationFrame(scan)}}

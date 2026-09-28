@@ -1,6 +1,7 @@
 const params=new URLSearchParams(location.search),TYPE=params.get("type")==="tv"?"tv":"movie",ID=/^[1-9]\d*$/.test(params.get("id")||"")?params.get("id"):"";
 const lastVisit=getHistory().find(x=>x.type===TYPE&&String(x.id)===ID);
-let season=Math.max(1,Number(params.get('s'))||lastVisit?.season||1),episode=Math.max(1,Number(params.get('e'))||lastVisit?.episode||1),server=SERVER_ORDER.includes(params.get('server'))?params.get('server'):(lastVisit?.server||'server1'),seasons=[],title=lastVisit?.title||'';
+let season=Math.max(1,Number(params.get('s'))||lastVisit?.season||1),episode=Math.max(1,Number(params.get('e'))||lastVisit?.episode||1),server=SERVER_ORDER.includes(params.get('server'))?params.get('server'):(SERVER_ORDER.includes(lastVisit?.server)?lastVisit.server:'server1'),seasons=[],title=lastVisit?.title||'';
+let playerRequest=0;
 let playbackSession='',activeVideo=null,lastProgress=0;
 function recordVisit(extra={}){if(!ID)return;return saveHistory({id:ID,type:TYPE,title:title||lastVisit?.title||'Title '+ID,season,episode,server,...extra})}
 window.addEventListener('message',event=>{
@@ -22,7 +23,7 @@ app.innerHTML=`<div class="app"><main class="main"><div class="watch-page">
 <div class="controls-bar"><div class="controls-group"><span class="controls-label">Playback</span>
 ${TYPE==="tv"?`<select class="server-select episode-select" id="topSeason" aria-label="Season"></select><select class="server-select episode-select" id="topEpisode" aria-label="Episode"></select>`:""}
 </div><div class="controls-group"><span class="controls-label">Zoom</span><button class="zoom-btn active" data-z="fit">Fit</button><button class="zoom-btn" data-z="fill">1x</button><button class="zoom-btn" data-z="ultra">Ultra</button></div>
-<div class="controls-group"><span class="controls-label">Server</span><select class="server-select" id="server">${SERVER_ORDER.map(x=>`<option value="${x}">${STREAM_SERVERS[x].label}</option>`).join("")}</select><button class="download-btn" id="downloadBtn" title="Available only when an authorized direct download is configured">${icon("download")}<span>Download</span></button><button class="save-btn" id="save">${icon("heart")}<span>Save</span></button></div></div>
+<div class="controls-group"><span class="controls-label">Server</span><label class="experimental-toggle"><input type="checkbox" id="experimentalToggle"> Experimental</label><select class="server-select" id="server">${SERVER_ORDER.map(x=>`<option value="${x}">${STREAM_SERVERS[x].label}</option>`).join("")}</select><button class="download-btn" id="downloadBtn" title="Available only when an authorized direct download is configured">${icon("download")}<span>Download</span></button><button class="save-btn" id="save">${icon("heart")}<span>Save</span></button></div></div>
 <div class="player-wrap"><iframe id="frame" allow="accelerometer; autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen loading="eager" referrerpolicy="no-referrer"></iframe></div>
 <p id="playerStatus" role="status" style="color:var(--muted);font-size:12px"></p><div class="info-card"><div class="info-top"><h1 class="info-title" id="title">Loading…</h1><div class="info-badges"><span class="info-badge rating" id="rating">${icon("spark")} <span>—</span></span><span class="info-badge" id="year">—</span></div></div><p class="info-overview" id="overview">Loading description…</p></div>
 <div class="episodes-card" id="episodes" style="display:none"><div class="episodes-head"><h3>Select Season & Episode</h3><div class="season-tabs" id="seasons"></div></div><div class="episode-grid" id="episodeGrid"></div><div class="now-playing-strip" id="nowPlaying"></div></div>
@@ -35,6 +36,11 @@ document.getElementById('server').value=server;
 document.getElementById("back").onclick=()=>location.href=TYPE==="movie"?"movies.html":"series.html";
 document.querySelectorAll("[data-z]").forEach(b=>b.onclick=()=>{document.querySelectorAll("[data-z]").forEach(x=>x.classList.remove("active"));b.classList.add("active");document.getElementById("frame").style.transform=b.dataset.z==="fill"?"scale(1.08)":b.dataset.z==="ultra"?"scale(1.18)":"scale(1)"});
 document.getElementById("server").onchange=e=>{server=e.target.value;loadPlayer()};
+document.getElementById('experimentalToggle').onchange=e=>{
+ const select=document.getElementById('server');
+ if(e.target.checked){const opt=document.createElement('option');opt.value='experimental';opt.textContent=STREAM_SERVERS.experimental.label;select.appendChild(opt)}
+ else{select.querySelector('[value="experimental"]')?.remove();if(server==='experimental'){server='server1';select.value=server;loadPlayer()}}
+};
 
 function syncTopSelectors(){
  const ss=document.getElementById("topSeason"),es=document.getElementById("topEpisode");
@@ -51,12 +57,18 @@ function updateEpisodeUI(){
  const np=document.getElementById("nowPlaying");if(np)np.innerHTML=`Now playing: <b>Season ${season}, Episode ${episode}</b>`;
 }
 function loadPlayer(){
- const f=document.getElementById("frame"),status=document.getElementById("playerStatus");
- const cfg=STREAM_SERVERS[server],u=cfg?.buildUrl?.(TYPE,ID,season,episode);
+ let f=document.getElementById("frame");const status=document.getElementById("playerStatus");
+ const cfg=STREAM_SERVERS[server];let u=cfg?.buildUrl?.(TYPE,ID,season,episode);
  if(!u||u==="about:blank"){status.textContent="This server is not configured.";return}
- status.textContent="If the video does not play, try the other server. External player availability varies.";
+ status.textContent=cfg.experimental?"Experimental server • speed and availability are under testing.":"Pop-ups and external links blocked. If playback fails, try the other server.";
  f.setAttribute("sandbox","allow-scripts allow-same-origin allow-presentation allow-orientation-lock");
- if(f.getAttribute("src")!==u){playbackSession=String(Date.now())+'-'+Math.random();activeVideo=null;recordVisit();f.src=u;}
+ if(f.dataset.source!==u){
+  // A fresh browsing context prevents a provider SPA retaining the previous episode.
+  const fresh=f.cloneNode(false);fresh.removeAttribute('src');fresh.dataset.source=u;
+  fresh.name='moviesansar-'+(++playerRequest);playbackSession=String(Date.now())+'-'+Math.random();activeVideo=null;
+  fresh.setAttribute('sandbox','allow-scripts allow-same-origin allow-presentation allow-orientation-lock');
+  f.replaceWith(fresh);f=fresh;recordVisit();f.src=u;
+ }
  updateEpisodeUI();
 }
 // Do not disguise an external player page as a download.

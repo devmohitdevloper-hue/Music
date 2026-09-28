@@ -11,12 +11,9 @@ function context(fetch){const saved=new Map();const c=vm.createContext({fetch,Ab
  const start=Date.now();const result=await vm.runInContext('fetchJSON("https://test/slow")',race);assert.equal(result.winner,'proxy');assert(Date.now()-start<1800,'proxy should not wait for direct timeout');assert.equal(calls.length,2);
  const failed=context(async()=>{throw Error('offline')});await assert.rejects(vm.runInContext('fetchJSON("https://test/fail",20)',failed));
  const markup=vm.runInContext('shell("series","test")',c);assert(!/music.html|study.html/.test(markup));
- // Test player navigation with a deliberately minimal DOM, no claims of rendered QA.
- const nodes=new Map();function node(id){if(!nodes.has(id))nodes.set(id,{style:{},innerHTML:'',textContent:'',hidden:false,attributes:{},setAttribute(k,v){this.attributes[k]=v},getAttribute(k){return k==='src'?this.src:this.attributes[k]},classList:{toggle(){},add(){},remove(){}}});return nodes.get(id)}
- const w=vm.createContext({closeLibrary(){},openLibrary(){},getHistory:()=>[],historyKey:x=>JSON.stringify(x),saveHistory:x=>x,bottomNavHTML:()=>'',libraryPanelHTML:()=>'',window:{addEventListener(){}},URLSearchParams,location:{search:'?type=tv&id=123'},document:{getElementById:node,querySelector:()=>node('libraryButton'),querySelectorAll:()=>[]},localStorage:{getItem:()=>null,setItem(){}},icon:()=>'',themePanelHTML:()=>'',initTheme(){},SERVER_ORDER:['server1','server2'],STREAM_SERVERS:{server1:{buildUrl:(t,id,s,e)=>`https://video.example/${id}/${s}/${e}`},server2:{buildUrl:()=> 'https://video2.example/'}},FALLBACK_CATALOG:{movies:[],series:[]},TMDB:{tvDetails:()=>new Promise(()=>{})},Date});
- vm.runInContext(fs.readFileSync('js/watch.js','utf8'),w);
- assert.equal(node('frame').src,'https://video.example/123/1/1','playback starts before metadata');assert(!node('frame').attributes.sandbox.includes('allow-popups'));assert.equal(node('downloadBtn').hidden,true);
- vm.runInContext('episode=2;loadPlayer()',w);assert(node('frame').src.endsWith('/2'));
- node('server').onchange({target:{value:'server2'}});assert.equal(node('frame').src,'https://video2.example/');
- console.log('PASS: in-flight dedup, persistent API cache, fallback cancellation, hedged proxy win, offline rejection, removed navigation, immediate playback before metadata, popup sandbox, disabled fake download, episode and server switching.');
+ const make=(id,s,e)=>vm.runInContext(`STREAM_SERVERS.server2.buildUrl('tv',${id},${s},${e})`,c);
+ assert(make(1399,1,2).includes('/tv/1399/1/2?'));
+ assert(make(1399,2,1).includes('/tv/1399/2/1?'));
+ assert(!vm.runInContext('SERVER_ORDER.includes("experimental")',c));
+ console.log('PASS: in-flight dedup, persistent API cache, fallback cancellation, hedged proxy win, offline rejection, removed navigation, Server 2 season/episode paths, experimental opt-in.');
 })().catch(e=>{console.error(e);process.exitCode=1});

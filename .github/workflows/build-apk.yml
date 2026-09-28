@@ -2,7 +2,7 @@ name: Build Movie Sansar APK
 on:
   workflow_dispatch:
   push:
-    paths: ['android/**', 'js/**', 'css/**', '*.html', 'ad-hosts.txt', '.github/workflows/build-apk.yml']
+    paths: ['android/**', 'js/**', 'css/**', '*.html', 'ad-hosts.txt', 'tests/**', 'scripts/**', '.github/workflows/build-apk.yml']
 permissions:
   contents: read
 jobs:
@@ -28,6 +28,8 @@ jobs:
           gradle-version: '8.9'
       - name: Install Android SDK
         run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
+      - name: Bundle maintained ad and malware blocklist
+        run: python3 scripts/update-ad-filter.py
       - name: Check JavaScript
         run: node tests/runtime.cjs
       - name: Browser regression checks
@@ -35,10 +37,12 @@ jobs:
           npm install --no-save playwright@1.58.2
           npx playwright install --with-deps chromium
           node tests/browser.cjs
+      - name: Check live provider integration
+        run: node tests/live.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: Movie-Sansar-v8-Layout-Checks
+          name: Movie-Sansar-v9-Layout-Checks
           path: qa/
           if-no-files-found: ignore
       - name: Prepare persistent debug signing key
@@ -61,6 +65,6 @@ jobs:
           PYCODE
       - uses: actions/upload-artifact@v4
         with:
-          name: Movie-Sansar-v8-APK
+          name: Movie-Sansar-v9-APK
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
