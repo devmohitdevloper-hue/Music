@@ -6,8 +6,8 @@ android {
   applicationId 'com.moviesansar.app'
   minSdk 26
   targetSdk 35
-  versionCode 7
-  versionName '7.0'
+  versionCode 8
+  versionName '8.0'
  }
  compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
  sourceSets { main { assets.srcDirs = [layout.buildDirectory.dir('generated/webAssets')] } }
@@ -19,3 +19,5 @@ tasks.register('syncWebAssets', Sync) {
  into(layout.buildDirectory.dir('generated/webAssets'))
 }
 tasks.named('preBuild').configure { dependsOn 'syncWebAssets' }
+
+dependencies { implementation 'androidx.webkit:webkit:1.12.1' }

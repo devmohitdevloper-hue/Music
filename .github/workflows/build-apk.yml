@@ -30,6 +30,17 @@ jobs:
         run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
       - name: Check JavaScript
         run: node tests/runtime.cjs
+      - name: Browser regression checks
+        run: |
+          npm install --no-save playwright@1.58.2
+          npx playwright install --with-deps chromium
+          node tests/browser.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Movie-Sansar-v8-Layout-Checks
+          path: qa/
+          if-no-files-found: ignore
       - name: Build installable debug APK
         run: gradle -p android --no-daemon assembleDebug
       - name: Verify signed APK and packaged assets
@@ -44,6 +55,6 @@ jobs:
           PYCODE
       - uses: actions/upload-artifact@v4
         with:
-          name: Movie-Sansar-v7-APK
+          name: Movie-Sansar-v8-APK
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error

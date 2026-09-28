@@ -16,3 +16,13 @@ clickadu.com
 clickadilla.com
 onclkds.com
 onclicka.com
+
+# Additional popup / advertising delivery hosts
+profitableratecpm.com
+highperformanceformat.com
+highrevenuegate.com
+highrevenuenetwork.com
+effectivegatecpm.com
+effectivecpmrate.com
+realsrv.com
+ad.a-ads.com

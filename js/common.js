@@ -205,13 +205,6 @@ function shell(section,content){
  return `<div class="app">
  <aside class="sidebar" id="sidebar" aria-hidden="false">
   <div class="brand"><div class="logo">${icon("spark")}</div><div class="brand-copy"><b>MOVIE SANSAR</b><small>Movies • Web Series</small></div><button class="side-close" id="sideClose" aria-label="Close menu">${icon("close")}</button></div>
-  <div class="side-heading">BROWSE</div>
-  <nav class="section-nav" aria-label="Main navigation">
-   <a data-page="movies.html" data-section-nav="movies">${icon("movie")}<span>Movie Sansar</span></a>
-   <a data-page="series.html" data-section-nav="series">${icon("series")}<span>Web-Series Sansar</span></a>
-  </nav>
-  <div class="side-heading">${sectionName.toUpperCase()} CATEGORIES</div>
-  <nav class="category-list" aria-label="Categories">${categoryButtons}</nav>
   <div class="utility">
    <a href="#" data-action="library">${icon("library")}<span>My Library</span></a>
    <a href="#" data-action="recent">${icon("recent")}<span>Recently Added</span></a>
@@ -222,13 +215,10 @@ function shell(section,content){
  <main class="main">${content}<footer class="site-footer"><div>© ${new Date().getFullYear()} <strong>Movie Sansar</strong> • Created by <strong>Mohit Mishra</strong></div><a href="#" data-portfolio-link>View Portfolio ↗</a></footer></main>
  </div>
  <div class="sidebar-overlay" id="overlay"></div>
- <nav class="bottom-nav" aria-label="Mobile navigation">
-  <a data-page="movies.html" data-section-nav="movies">${icon("movie")}<span>Movies</span></a>
-  <a data-page="series.html" data-section-nav="series">${icon("series")}<span>Series</span></a>
- </nav>
+ ${bottomNavHTML(section)}
  <button class="theme-top-control mobile-theme-control" id="themeTopControl" aria-label="Open theme settings">${icon("theme")}<span>Theme</span></button>
  <div class="download-panel" id="downloadPanel" aria-hidden="true"><div class="download-head"><div><b>Downloads</b><small id="downloadSummary">Authorized downloads</small></div><button id="downloadClose" aria-label="Close downloads">${icon("close")}</button></div><div class="download-quality"><span>Quality</span><div class="quality-row">${["360p","480p","720p","1080p"].map(q=>`<button type="button" class="quality-choice ${q===(localStorage.getItem('moviesansar-quality')||'720p')?'active':''}" data-quality="${q}">${q}</button>`).join("")}</div></div><div id="downloadList" class="download-list"></div></div>
- <div class="library-panel" id="libraryPanel" aria-hidden="true"><div class="download-head"><div><b>My Library</b><small>Saved titles on this device</small></div><button id="libraryClose" aria-label="Close library">${icon("close")}</button></div><div id="libraryList" class="download-list"></div></div>
+ ${libraryPanelHTML()}
  ${themePanelHTML()}`;
 }
 function cardHTML(it,label,type,i=0){
@@ -247,7 +237,20 @@ function closeDownloads(){const p=document.getElementById("downloadPanel");p?.cl
 function openLibrary(){const p=document.getElementById("libraryPanel");if(!p)return;p.classList.add("open");p.setAttribute("aria-hidden","false");renderLibrary()}
 function closeLibrary(){const p=document.getElementById("libraryPanel");p?.classList.remove("open");p?.setAttribute("aria-hidden","true")}
 function getLibrary(){try{return JSON.parse(localStorage.getItem("moviesansar-watchlist")||"[]")}catch(e){return[]}}
-function renderLibrary(){const el=document.getElementById("libraryList");if(!el)return;const a=getLibrary();el.innerHTML=a.length?a.map(x=>`<div class="download-item"><div class="download-item-main">${icon("heart")}<div><b>${esc(x.title||"Saved title")}</b><small>${x.type==='movie'?'Movie Sansar':'Web-Series Sansar'}</small></div></div><button type="button" data-library-open="${esc(x.type)}:${esc(x.id)}">Open</button></div>`).join(""):`<div class="download-empty">${icon("heart")}<span>Your library is empty.</span></div>`;el.querySelectorAll("[data-library-open]").forEach(b=>b.onclick=()=>{const [type,id]=b.dataset.libraryOpen.split(":");location.href=`watch.html?type=${type}&id=${encodeURIComponent(id)}`})}
+function bottomNavHTML(active){return `<nav class="bottom-nav" aria-label="Main navigation"><a href="movies.html" data-page="movies.html" data-section-nav="movies" class="${active==='movies'?'active':''}">${icon('movie')}<span>Movies</span></a><a href="series.html" data-page="series.html" data-section-nav="series" class="${active==='series'?'active':''}">${icon('series')}<span>Web Series</span></a><a href="#" data-action="library">${icon('library')}<span>Library</span></a></nav>`}
+function libraryPanelHTML(){return `<div class="library-panel" id="libraryPanel" aria-hidden="true"><div class="download-head"><div><b>My Library</b><small>Continue watching • History • Saved</small></div><button id="libraryClose" aria-label="Close library">${icon('close')}</button></div><div id="libraryList" class="download-list"></div></div>`}
+function getHistory(){try{const a=JSON.parse(localStorage.getItem('moviesansar-history-v8')||'[]');return Array.isArray(a)?a:[]}catch(e){return []}}
+function historyKey(x){return `${x.type}:${x.id}:${x.season||1}:${x.episode||1}`}
+function saveHistory(x){const a=getHistory(),key=historyKey(x),old=a.find(y=>historyKey(y)===key)||{};const item={...old,...x,updatedAt:Date.now()};try{localStorage.setItem('moviesansar-history-v8',JSON.stringify([item,...a.filter(y=>historyKey(y)!==key)].slice(0,200)))}catch(e){}return item}
+function timeLabel(t){t=Math.floor(Number(t)||0);return `${Math.floor(t/60)}:${String(t%60).padStart(2,'0')}`}
+function historyUrl(x){return `watch.html?type=${encodeURIComponent(x.type)}&id=${encodeURIComponent(x.id)}&s=${x.season||1}&e=${x.episode||1}&server=${encodeURIComponent(x.server||'server1')}`}
+function renderLibrary(){
+ const el=document.getElementById('libraryList');if(!el)return;
+ const history=getHistory(),saved=getLibrary();
+ function rows(a,kind){return a.length?a.map(x=>`<div class="download-item"><div class="download-item-main"><div><b>${esc(x.title||'Title '+x.id)}</b><small>${x.type==='tv'?`S${x.season||1} · E${x.episode||1} • `:''}${x.watchedAt?(x.completed?'Completed':timeLabel(x.position)+' watched'):'Recently opened'}</small></div></div><a href="${esc(historyUrl(x))}">${x.position&&!x.completed?'Resume':'Open'}</a><button data-remove-kind="${kind}" data-remove-key="${esc(kind==='saved'?x.type+':'+x.id:historyKey(x))}" aria-label="Remove ${esc(x.title||'title')}">×</button></div>`).join(''):'<p class="library-empty">Nothing here yet.</p>'}
+ el.innerHTML='<h3>Continue watching</h3>'+rows(history.filter(x=>x.watchedAt&&x.position>0&&!x.completed),'history')+'<h3>History</h3>'+rows(history,'history')+'<h3>Saved</h3>'+rows(saved.map(x=>({...x,...history.find(h=>h.id===x.id&&h.type===x.type)})),'saved');
+ el.querySelectorAll('[data-remove-key]').forEach(b=>b.onclick=()=>{if(b.dataset.removeKind==='saved')localStorage.setItem('moviesansar-watchlist',JSON.stringify(getLibrary().filter(x=>x.type+':'+x.id!==b.dataset.removeKey)));else localStorage.setItem('moviesansar-history-v8',JSON.stringify(getHistory().filter(x=>historyKey(x)!==b.dataset.removeKey)));renderLibrary()});
+}
 function initDownloadCenter(){
  document.getElementById("downloadsLink")?.addEventListener("click",e=>{e.preventDefault();openDownloads()});
  document.getElementById("downloadClose")?.addEventListener("click",closeDownloads);

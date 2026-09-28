@@ -266,3 +266,15 @@ button,a{touch-action:manipulation}
 .card{animation:none!important;content-visibility:auto;contain-intrinsic-size:auto 280px}
 [hidden]{display:none!important}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+/* v8: one navigation layout for every viewport. */
+.bottom-nav{display:grid!important;position:fixed!important;left:12px!important;right:12px!important;bottom:calc(8px + env(safe-area-inset-bottom))!important;top:auto!important;height:62px!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;background:var(--panel)!important;border:1px solid var(--line);border-radius:16px;padding:5px!important;gap:5px;z-index:300!important}
+.bottom-nav a{display:flex!important;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11px!important;color:var(--muted);border-radius:11px}
+.bottom-nav a .svg-icon{height:19px;width:19px}.bottom-nav a span{font-size:11px!important}
+.bottom-nav a.active{background:var(--panel2);color:var(--accent)}
+.main{margin-left:0!important;width:100%!important;padding-bottom:85px!important}
+.sidebar{position:fixed!important;left:0!important;top:0!important;bottom:0!important;transform:translateX(-110%)!important;width:min(300px,86vw)!important;height:100dvh!important;z-index:410!important}
+.sidebar.open{transform:translateX(0)!important}.mobile-menu,.side-close{display:block!important}
+.sidebar-overlay{display:block!important;opacity:0!important;pointer-events:none!important}.sidebar-overlay.show{opacity:1!important;pointer-events:auto!important}
+.library-panel{bottom:84px!important;max-height:calc(100dvh - 110px)!important}.library-empty{color:var(--muted);font-size:12px}.download-item-main{min-width:0;flex:1}.download-item-main b{white-space:normal!important;overflow-wrap:anywhere}
+@media(orientation:landscape){.chips{display:flex!important;flex-wrap:wrap!important;overflow:visible!important;max-height:none!important;gap:8px!important;padding:14px 0!important}.chip{flex:0 0 auto}.content{padding-top:20px!important}.bottom-nav{height:54px!important}.main{padding-bottom:76px!important}}

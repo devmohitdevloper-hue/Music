@@ -1,5 +1,20 @@
 const params=new URLSearchParams(location.search),TYPE=params.get("type")==="tv"?"tv":"movie",ID=/^[1-9]\d*$/.test(params.get("id")||"")?params.get("id"):"";
-let season=1,episode=1,server="server1",seasons=[],title="";
+const lastVisit=getHistory().find(x=>x.type===TYPE&&String(x.id)===ID);
+let season=Math.max(1,Number(params.get('s'))||lastVisit?.season||1),episode=Math.max(1,Number(params.get('e'))||lastVisit?.episode||1),server=SERVER_ORDER.includes(params.get('server'))?params.get('server'):(lastVisit?.server||'server1'),seasons=[],title=lastVisit?.title||'';
+let playbackSession='',activeVideo=null,lastProgress=0;
+function recordVisit(extra={}){if(!ID)return;return saveHistory({id:ID,type:TYPE,title:title||lastVisit?.title||'Title '+ID,season,episode,server,...extra})}
+window.addEventListener('message',event=>{
+ const m=event.data;if(!m||m.token!==window.__MS_TOKEN||!window.__MS_TOKEN||!event.source||event.source===window)return;
+ if(m.kind==='MS_VIDEO_READY'){
+  const prior=getHistory().find(x=>historyKey(x)===historyKey({type:TYPE,id:ID,season,episode}));
+  event.source.postMessage({kind:'MS_VIDEO_CONFIG',token:window.__MS_TOKEN,videoKey:m.videoKey,session:playbackSession,position:prior?.completed?0:(prior?.position||0)},event.origin==='null'?'*':event.origin);
+ }else if(m.kind==='MS_VIDEO_PROGRESS'&&m.session===playbackSession){
+  const position=Number(m.position),duration=Number(m.duration);
+  if(!Number.isFinite(position)||!Number.isFinite(duration)||duration<60||duration>172800||position<0||position>duration+1)return;
+  activeVideo=event.source;lastProgress=Date.now();recordVisit({position,duration,watchedAt:Date.now(),completed:position>=duration-10});
+  document.getElementById('playerStatus').textContent='Progress saved • '+timeLabel(position);
+ }
+});
 const app=document.getElementById("app");
 
 app.innerHTML=`<div class="app"><main class="main"><div class="watch-page">
@@ -11,9 +26,12 @@ ${TYPE==="tv"?`<select class="server-select episode-select" id="topSeason" aria-
 <div class="player-wrap"><iframe id="frame" allow="accelerometer; autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen loading="eager" referrerpolicy="no-referrer"></iframe></div>
 <p id="playerStatus" role="status" style="color:var(--muted);font-size:12px"></p><div class="info-card"><div class="info-top"><h1 class="info-title" id="title">Loading…</h1><div class="info-badges"><span class="info-badge rating" id="rating">${icon("spark")} <span>—</span></span><span class="info-badge" id="year">—</span></div></div><p class="info-overview" id="overview">Loading description…</p></div>
 <div class="episodes-card" id="episodes" style="display:none"><div class="episodes-head"><h3>Select Season & Episode</h3><div class="season-tabs" id="seasons"></div></div><div class="episode-grid" id="episodeGrid"></div><div class="now-playing-strip" id="nowPlaying"></div></div>
-<h3 class="related-title">More Like This</h3><div class="grid" id="related"></div><footer class="site-footer"><div>© ${new Date().getFullYear()} <strong>Movie Sansar</strong> • Created by <strong>Mohit Mishra</strong></div></footer></div></main></div>${themePanelHTML()}`;
+<h3 class="related-title">More Like This</h3><div class="grid" id="related"></div><footer class="site-footer"><div>© ${new Date().getFullYear()} <strong>Movie Sansar</strong> • Created by <strong>Mohit Mishra</strong></div></footer></div></main></div>${bottomNavHTML(TYPE==="movie"?"movies":"series")}${libraryPanelHTML()}${themePanelHTML()}`;
 
 initTheme();
+document.querySelector('[data-action="library"]').onclick=e=>{e.preventDefault();openLibrary()};
+document.getElementById('libraryClose').onclick=closeLibrary;
+document.getElementById('server').value=server;
 document.getElementById("back").onclick=()=>location.href=TYPE==="movie"?"movies.html":"series.html";
 document.querySelectorAll("[data-z]").forEach(b=>b.onclick=()=>{document.querySelectorAll("[data-z]").forEach(x=>x.classList.remove("active"));b.classList.add("active");document.getElementById("frame").style.transform=b.dataset.z==="fill"?"scale(1.08)":b.dataset.z==="ultra"?"scale(1.18)":"scale(1)"});
 document.getElementById("server").onchange=e=>{server=e.target.value;loadPlayer()};
@@ -38,7 +56,7 @@ function loadPlayer(){
  if(!u||u==="about:blank"){status.textContent="This server is not configured.";return}
  status.textContent="If the video does not play, try the other server. External player availability varies.";
  f.setAttribute("sandbox","allow-scripts allow-same-origin allow-presentation allow-orientation-lock");
- if(f.getAttribute("src")!==u)f.src=u;
+ if(f.getAttribute("src")!==u){playbackSession=String(Date.now())+'-'+Math.random();activeVideo=null;recordVisit();f.src=u;}
  updateEpisodeUI();
 }
 // Do not disguise an external player page as a download.
@@ -60,14 +78,14 @@ async function loadDetails(){
  }
 }
 async function applyDetails(d,offline=false){
- title=d.title||d.name||"Untitled";
+ title=d.title||d.name||"Untitled";recordVisit();
  document.title="Movie Sansar — "+title;
  document.getElementById("title").textContent=title;
  document.getElementById("rating").innerHTML=`${icon("spark")} <span>${d.vote_average?Number(d.vote_average).toFixed(1):"N/A"}</span>`;
  document.getElementById("year").textContent=(d.release_date||d.first_air_date||"").slice(0,4)||"N/A";
  document.getElementById("overview").textContent=d.overview||(offline?"Offline catalog preview. Connect to the catalog to load the full description.":"No description available.");
 
- if(TYPE==="tv"&&!offline){seasons=(d.seasons||[]).filter(x=>x.season_number>0);if(seasons.length){document.getElementById("episodes").style.display="";season=seasons[0].season_number;renderSeasons();await loadEpisodes()}}
+ if(TYPE==="tv"&&!offline){seasons=(d.seasons||[]).filter(x=>x.season_number>0);if(seasons.length){document.getElementById("episodes").style.display="";if(!seasons.some(s=>s.season_number===season)){season=seasons[0].season_number;episode=1;}renderSeasons();await loadEpisodes()}}
  loadSaved();
  if(!offline){if(!(TYPE==="movie"&&document.getElementById("frame")?.src))loadPlayer();loadRelated()}
 }

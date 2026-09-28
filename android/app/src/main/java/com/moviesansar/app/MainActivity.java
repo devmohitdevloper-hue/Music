@@ -7,6 +7,9 @@ import android.graphics.Color;
 import android.view.View;
 import android.view.WindowInsets;
 import android.webkit.*;
+import androidx.webkit.WebViewCompat;
+import androidx.webkit.WebViewFeature;
+import org.json.JSONObject;
 import android.widget.FrameLayout;
 import java.io.*;
 import java.util.*;
@@ -28,6 +31,8 @@ public class MainActivity extends Activity {
  private WebResourceResponse empty(){return new WebResourceResponse("text/plain","UTF-8",new ByteArrayInputStream(new byte[0]));}
  private WebResourceResponse intercept(Uri uri){
   if(blocked(uri))return empty();
+  String remotePath=uri.getPath()==null?"":uri.getPath().toLowerCase(Locale.ROOT);
+  if(!local(uri)&&(remotePath.matches(".*/(popunder|popads|popcash|adsterra|vast|vpaid)(\\.[a-z]+)?$")||remotePath.startsWith("/ads/")))return empty();
   if(!local(uri))return null;
   String path=uri.getPath();
   if(path==null||!path.startsWith("/assets/")||path.contains(".."))return empty();
@@ -77,6 +82,13 @@ public class MainActivity extends Activity {
    }
    @Override public void onHideCustomView(){exitFullscreen();}
   });
+  if(WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)){
+   try(InputStream input=getAssets().open("js/player-guard.js")){
+    ByteArrayOutputStream out=new ByteArrayOutputStream();byte[] buf=new byte[4096];int n;while((n=input.read(buf))!=-1)out.write(buf,0,n);
+    String script="window.__MS_TOKEN="+JSONObject.quote(UUID.randomUUID().toString())+";"+out.toString("UTF-8");
+    WebViewCompat.addDocumentStartJavaScript(web,script,Collections.singleton("*"));
+   }catch(IOException ignored){}
+  }
   if(state==null||web.restoreState(state)==null)web.loadUrl("https://"+HOST+"/assets/movies.html");
  }
  private void exitFullscreen(){
