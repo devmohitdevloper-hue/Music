@@ -29,6 +29,18 @@ const server=http.createServer((req,res)=>{try{const f=path.join(process.cwd(),n
     if(frame){step.text=(await frame.locator('body').innerText({timeout:3000}).catch(()=>'' )).slice(0,5000);step.videoCount=await frame.locator('video').count();}
     step.episodeLabelMatches=provider==='server2'?step.text.includes('S1:E'+ep):null;
     step.challenge=/verify you are human|security verification|cloudflare|access denied/i.test(step.text);
+    if(!step.challenge&&frame){
+     const play=frame.getByRole('button',{name:/^(play|play video|start playback)$/i}).first();
+     if(await play.count())await play.click({timeout:3000}).catch(e=>{step.clickError=e.message});
+     else if(provider==='server2'&&step.episodeLabelMatches){const box=await page.locator('#frame').boundingBox();await page.locator('#frame').click({position:{x:box.width/2,y:box.height/2},timeout:3000}).catch(e=>{step.clickError=e.message})}
+     await page.waitForTimeout(10000);
+     step.afterClickText=(await frame.locator('body').innerText({timeout:3000}).catch(()=>'' )).slice(0,3000);
+     step.videos=[];
+     for(const f of page.frames()){
+      try{step.videos.push(...await f.locator('video').evaluateAll(vs=>vs.map(v=>({paused:v.paused,time:v.currentTime,duration:Number.isFinite(v.duration)?v.duration:null,readyState:v.readyState,error:v.error?.code||null}))))}catch(e){}
+     }
+     step.framesAfter=page.frames().map(f=>f.url());
+    }
     await page.screenshot({path:`qa/live-${provider}-ep${ep}.png`});item.steps.push(step);
    }
   }catch(e){item.errors.push(e.message)}
