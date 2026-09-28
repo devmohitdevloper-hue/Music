@@ -1,0 +1,20 @@
+name: Inspect live player integrations
+on:
+  push:
+    paths: ['tests/probe.cjs', '.github/workflows/probe-players.yml']
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm install --no-save playwright@1.58.2
+      - run: npx playwright install --with-deps chromium
+      - run: node tests/probe.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Live-Player-Diagnostics
+          path: qa-live/
