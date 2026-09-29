@@ -92,7 +92,7 @@ const STREAM_SERVERS={
   buildUrl:(type,id,s,e)=>type==="movie"?`https://nxsha.space/embed/movie/${id}?disable_app_ad=true&disable_dl_button=true&color=${encodeURIComponent(playerAccent())}`:`https://nxsha.space/embed/tv/${id}/${s}/${e}?disable_app_ad=true&disable_dl_button=true&color=${encodeURIComponent(playerAccent())}`},
  test_vidzee:{label:"Test 1 • VidZee",experimental:true,referrerPolicy:"strict-origin-when-cross-origin",
   buildUrl:(type,id,s,e)=>type==="movie"?`https://player.vidzee.wtf/embed/movie/${id}`:`https://player.vidzee.wtf/embed/tv/${id}/${s}/${e}`},
- test_nhd:{label:"Test 2 • NHD",experimental:true,referrerPolicy:"strict-origin-when-cross-origin",note:"Some movie sources may be unavailable.",
+ test_nhd:{label:"Test 2 • NHD",experimental:true,referrerPolicy:"strict-origin-when-cross-origin",note:"Source availability varies; movies and episodes may fail.",
   buildUrl:(type,id,s,e)=>type==="movie"?`https://nhdapi.st/movie/${id}`:`https://nhdapi.st/tv/${id}/${s}/${e}`},
  server3:{label:"Server 3 • Owner CDN",sandbox:"allow-scripts allow-same-origin allow-forms allow-presentation allow-orientation-lock",
   buildUrl:(type,id,s,e)=>{

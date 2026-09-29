@@ -13,12 +13,13 @@ const server=http.createServer((req,res)=>{try{const f=path.join(process.cwd(),n
   context.on('page',p=>{item.popups++;p.close().catch(()=>{})});
   await context.route('**/*',async r=>{const u=new URL(r.request().url());observed.add(u.hostname);
    if(blocked(u.hostname)||/\/(popunder|popads|popcash|adsterra|vast|vpaid)(\.[a-z]+)?$/.test(u.pathname)||u.pathname.startsWith('/ads/')){item.blocked.push(u.hostname+u.pathname);return r.abort()}
+   if(u.hostname==='appassets.androidplatform.net'){const f=path.join(process.cwd(),u.pathname);try{return r.fulfill({contentType:f.endsWith('.js')?'application/javascript':f.endsWith('.css')?'text/css':'text/html',body:fs.readFileSync(f)})}catch(e){return r.fulfill({status:404,body:''})}}
    if(u.hostname==='api.themoviedb.org'){
     let data={results:[]};if(/\/tv\/1399$/.test(u.pathname))data={id:1399,name:'Game of Thrones',seasons:[{season_number:1,episode_count:10},{season_number:2,episode_count:10}]};
     if(u.pathname.includes('/season/'))data={episodes:Array.from({length:10},()=>({}))};return r.fulfill({json:data});}
    return r.continue();});
   try{
-   await page.goto('http://127.0.0.1:8124/watch.html?type=tv&id=1399&s=1&e=1&server='+ provider);
+   await page.goto('https://appassets.androidplatform.net/watch.html?type=tv&id=1399&s=1&e=1&server='+ provider);
    await page.waitForSelector('#topEpisode option[value="2"]',{state:'attached',timeout:12000});
    for(const [sn,ep] of (provider==='server2'?[[1,1],[1,2],[2,1]]:[[1,1],[1,2]])){
     if(sn===2)await page.locator('#topSeason').selectOption('2');
@@ -39,7 +40,8 @@ const server=http.createServer((req,res)=>{try{const f=path.join(process.cwd(),n
     step.challenge=/verify you are human|security verification|cloudflare|access denied/i.test(step.text);
     if(!step.challenge&&frame){
      const play=frame.getByRole('button',{name:/^(play|play video|start playback)$/i}).first();
-     if(await play.count())await play.click({timeout:3000}).catch(e=>{step.clickError=e.message});
+     if(provider==='test_nhd'){await page.locator('#frame').scrollIntoViewIfNeeded();const box=await page.locator('#frame').boundingBox();await page.locator('#frame').click({position:{x:box.width/2,y:box.height/2},timeout:3000}).catch(e=>{step.clickError=e.message})}
+     else if(await play.count())await play.click({timeout:3000}).catch(e=>{step.clickError=e.message});
      else if(provider==='server2'&&step.episodeLabelMatches){const box=await page.locator('#frame').boundingBox();await page.locator('#frame').click({position:{x:box.width/2,y:box.height/2},timeout:3000}).catch(e=>{step.clickError=e.message})}
      await page.waitForTimeout(10000);
      step.afterClickText=(await frame.locator('body').innerText({timeout:3000}).catch(()=>'' )).slice(0,3000);
