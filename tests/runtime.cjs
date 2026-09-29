@@ -14,6 +14,8 @@ function context(fetch){const saved=new Map();const c=vm.createContext({fetch,Ab
  const make=(id,s,e)=>vm.runInContext(`STREAM_SERVERS.server2.buildUrl('tv',${id},${s},${e})`,c);
  assert(make(1399,1,2).includes('/tv/1399/1/2?'));
  assert(make(1399,2,1).includes('/tv/1399/2/1?'));
- assert(!vm.runInContext('SERVER_ORDER.includes("experimental")',c));
+ assert.equal(vm.runInContext('EXPERIMENTAL_SERVER_ORDER.length',c),2);
+ assert(!vm.runInContext('SERVER_ORDER.some(x=>STREAM_SERVERS[x].experimental)',c));
+ assert.equal(vm.runInContext('new URLSearchParams(STREAM_SERVERS.server2.buildUrl("tv",1399,2,1).split("?")[1]).get("color")',c),'#8b6cff');
  console.log('PASS: in-flight dedup, persistent API cache, fallback cancellation, hedged proxy win, offline rejection, removed navigation, Server 2 season/episode paths, experimental opt-in.');
 })().catch(e=>{console.error(e);process.exitCode=1});

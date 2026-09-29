@@ -9,7 +9,7 @@ const server=http.createServer((req,res)=>{const f=path.join(root,new URL(req.ur
  let data={results:[{id:101,name:'Test Series',title:'Test Movie',vote_average:8,poster_path:'/test.jpg',vote_count:500}],page:1,total_pages:1};
  if(/\/(movie|tv)\/101$/.test(u.pathname))data={id:101,title:'Test Movie',name:'Test Series',overview:'Test',seasons:[{season_number:1,episode_count:3},{season_number:2,episode_count:3}]};
  if(u.pathname.includes('/season/'))data={episodes:[{},{},{}]};return r.fulfill({json:data});}
- if(/screenscape.me|nxsha.space/.test(u.hostname))return r.fulfill({contentType:'text/html',body:'<video id="video"></video><a id="redirect" href="https://ads.example" target="_self">Ad redirect</a><div class="ad-overlay">ADVERTISEMENT</div><button id="popup" onclick="window.open(\'https://ads.example\')">Popup</button>'});
+ if(/screenscape.me|nxsha.space|vidzee.wtf|nhdapi.st/.test(u.hostname))return r.fulfill({contentType:'text/html',body:'<div class="controls-bg-target" style="--player-accent:#facc15"><video id="video"></video></div><a id="redirect" href="https://ads.example" target="_self">Ad redirect</a><div class="ad-overlay">ADVERTISEMENT</div><button id="popup" onclick="window.open(\'https://ads.example\')">Popup</button>'});
  return r.abort();});
  fs.mkdirSync('qa',{recursive:true});
  for(const size of [{width:390,height:844},{width:844,height:390},{width:1280,height:800},{width:1920,height:1080}]){
@@ -28,9 +28,17 @@ const server=http.createServer((req,res)=>{const f=path.join(root,new URL(req.ur
  await page.goto('http://127.0.0.1:8123/series.html');await page.locator('.bottom-nav [data-action="library"]').click();await page.waitForSelector('#libraryPanel.open');assert((await page.locator('#libraryList').innerText()).includes('2:07'));await page.locator('#libraryList a').first().click();
  await page.waitForSelector('[data-e="3"]');frame=page.frames().find(f=>f.url().includes('nxsha.space'));await frame.waitForSelector('video');await mockVideo(frame);await frame.waitForFunction(()=>window.testTime===127);
  assert((await page.locator('#frame').getAttribute('src')).includes('/1/2?'));
+ const beforeThemeName=await page.locator('#frame').getAttribute('name');
+ await page.locator('#themeSettings').click();await page.locator('[data-theme-option="emerald"]').click();
+ await frame.waitForFunction(()=>getComputedStyle(document.querySelector('.controls-bg-target')).getPropertyValue('--player-accent').trim()==='#10b981');
+ assert.equal(await page.locator('#frame').getAttribute('name'),beforeThemeName,'theme must not reload playback');assert.equal(await frame.evaluate(()=>window.testTime),127);
+ await page.locator('[data-theme-option="crimson"]').click();
+ await frame.waitForFunction(()=>getComputedStyle(document.querySelector('.controls-bg-target')).getPropertyValue('--player-accent').trim()==='#ef4444');await page.locator('#themeClose').click();
+
  const frameName=await page.locator('#frame').getAttribute('name');
  await page.locator('#topEpisode').selectOption('3');
  await page.waitForFunction(()=>document.querySelector('#frame').src.includes('/1/3?'));
+ assert.equal(new URL(await page.locator('#frame').getAttribute('src')).searchParams.get('color'),'#ef4444');
  assert.notEqual(await page.locator('#frame').getAttribute('name'),frameName,'episode switch must replace browsing context');
  frame=page.frames().find(f=>f.url().includes('/1/3?'));await frame.waitForSelector('video');
  const before=frame.url();await frame.locator('#redirect').click();await frame.locator('#popup').click();await page.waitForTimeout(150);
@@ -48,7 +56,21 @@ const server=http.createServer((req,res)=>{const f=path.join(root,new URL(req.ur
   await page.locator('#topSeason').selectOption('1');
   await page.waitForFunction(()=>document.querySelector('#topEpisode').value==='1');
  }
- assert.equal(await page.locator('#server option').count(),2,'Do not ship failed experimental providers');
- await page.screenshot({path:'qa/resume.png'});assert.deepEqual(errors,[]);console.log('PASS: 4 viewport layouts, category wrapping, history, position capture, resume at 127s, episode/server persistence, popup and ad overlay removal, redirect blocking, fresh browsing context, season and episode changes through top selectors on both servers.');
+ assert.equal(await page.locator('#server optgroup[label="Experimental / Testing"] option').count(),2);
+ for(const [key,host] of [['test_vidzee','player.vidzee.wtf'],['test_nhd','nhdapi.st']]){
+  await page.locator('#server').selectOption(key);
+  assert((await page.locator('#playerStatus').innerText()).includes('Experimental'));
+  let url=new URL(await page.locator('#frame').getAttribute('src'));assert.equal(url.hostname,host);
+  assert.equal(await page.locator('#frame').getAttribute('referrerpolicy'),'strict-origin-when-cross-origin');
+  assert(!(await page.locator('#frame').getAttribute('sandbox')).includes('allow-popups'));
+  await page.locator('#topSeason').selectOption('2');await page.waitForFunction(()=>document.querySelector('#topEpisode').value==='1');
+  await page.locator('#topEpisode').selectOption('3');assert(new URL(await page.locator('#frame').getAttribute('src')).pathname.endsWith('/101/2/3'));
+  await page.locator('#topSeason').selectOption('1');await page.waitForFunction(()=>document.querySelector('#topEpisode').value==='1');
+ }
+ await page.goto('http://127.0.0.1:8123/watch.html?type=movie&id=101&server=test_vidzee');await page.waitForFunction(()=>document.querySelector('#frame')?.src.includes('/embed/movie/101'));
+ await page.locator('#server').selectOption('test_nhd');assert((await page.locator('#frame').getAttribute('src')).endsWith('/movie/101'));
+ await page.locator('#server').selectOption('server2');assert.equal(new URL(await page.locator('#frame').getAttribute('src')).searchParams.get('color'),'#ef4444');
+
+ await page.screenshot({path:'qa/resume.png'});assert.deepEqual(errors,[]);console.log('PASS: 4 viewport layouts, category wrapping, history, position capture, resume at 127s, episode/server persistence, popup and ad overlay removal, redirect blocking, fresh browsing context, season and episode changes through top selectors on both servers, live accent changes without reload or seek reset, experimental movie/TV URLs and season/episode controls.');
  await browser.close();server.close();
 })().catch(e=>{console.error(e);server.close();process.exit(1)});

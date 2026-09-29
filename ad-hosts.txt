@@ -30,3 +30,17 @@ ad.a-ads.com
 # Observed in the live Server 2 player on 2026-09-28
 cosedcost.com
 chebogrevets.com
+
+# Additional ad delivery hosts observed while testing external providers
+acscdn.com
+gustsbangled.com
+usrpubtrk.com
+adexchangerapid.com
+profitablecpmratenetwork.com
+intellipopup.com
+ukankingwithea.com
+tnizationservantas.org
+calledmetheapp.org
+
+# Ad-script host requested by VidZee during playback tests
+kishkeenocyte.com

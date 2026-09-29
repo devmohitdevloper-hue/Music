@@ -84,11 +84,16 @@ const TMDB={
  similarSeries:id=>TMDB.get(`/tv/${id}/similar`,{}).then(x=>x.results||[])
 };
 
+function playerAccent(){let key='aurora';try{key=localStorage.getItem('moviesansar-theme')||key}catch(e){}return (THEMES[key]||THEMES.aurora).accent}
 const STREAM_SERVERS={
  server1:{label:"Server 1",sandbox:"allow-scripts allow-same-origin allow-forms allow-presentation allow-orientation-lock",
   buildUrl:(type,id,s,e)=>type==="movie"?`https://screenscape.me/embed?tmdb=${id}&type=movie`:`https://screenscape.me/embed?tmdb=${id}&type=tv&s=${s}&e=${e}`},
  server2:{label:"Server 2",sandbox:"allow-scripts allow-same-origin allow-forms allow-presentation allow-orientation-lock",
-  buildUrl:(type,id,s,e)=>type==="movie"?`https://nxsha.space/embed/movie/${id}?disable_app_ad=true&disable_dl_button=true`:`https://nxsha.space/embed/tv/${id}/${s}/${e}?disable_app_ad=true&disable_dl_button=true`},
+  buildUrl:(type,id,s,e)=>type==="movie"?`https://nxsha.space/embed/movie/${id}?disable_app_ad=true&disable_dl_button=true&color=${encodeURIComponent(playerAccent())}`:`https://nxsha.space/embed/tv/${id}/${s}/${e}?disable_app_ad=true&disable_dl_button=true&color=${encodeURIComponent(playerAccent())}`},
+ test_vidzee:{label:"Test 1 • VidZee",experimental:true,referrerPolicy:"strict-origin-when-cross-origin",
+  buildUrl:(type,id,s,e)=>type==="movie"?`https://player.vidzee.wtf/embed/movie/${id}`:`https://player.vidzee.wtf/embed/tv/${id}/${s}/${e}`},
+ test_nhd:{label:"Test 2 • NHD",experimental:true,referrerPolicy:"strict-origin-when-cross-origin",note:"Some movie sources may be unavailable.",
+  buildUrl:(type,id,s,e)=>type==="movie"?`https://nhdapi.st/movie/${id}`:`https://nhdapi.st/tv/${id}/${s}/${e}`},
  server3:{label:"Server 3 • Owner CDN",sandbox:"allow-scripts allow-same-origin allow-forms allow-presentation allow-orientation-lock",
   buildUrl:(type,id,s,e)=>{
     if(!AUTHORIZED_STREAM_BASE)return "about:blank";
@@ -102,6 +107,8 @@ const STREAM_SERVERS={
   }}
 };
 const SERVER_ORDER=["server1","server2"];
+const EXPERIMENTAL_SERVER_ORDER=["test_vidzee","test_nhd"];
+const AVAILABLE_SERVERS=[...SERVER_ORDER,...EXPERIMENTAL_SERVER_ORDER];
 // Optional owner-controlled CDN slot. Leave empty unless you have an authorized source.
 const AUTHORIZED_STREAM_BASE="";
 function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
@@ -183,6 +190,7 @@ function applyTheme(key){
  const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="${t.accent}"/><stop offset="1" stop-color="${t.accent2}"/></linearGradient></defs><rect width="64" height="64" rx="18" fill="${t.bg}"/><rect x="6" y="6" width="52" height="52" rx="15" fill="url(#g)"/><text x="32" y="41" text-anchor="middle" font-family="Arial,sans-serif" font-size="29" font-weight="900" fill="#fff">✦</text></svg>`;
  faviconLink.href='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
  localStorage.setItem('moviesansar-theme',key);
+ window.dispatchEvent(new CustomEvent('moviesansar:theme',{detail:{accent:t.accent}}));
  document.querySelectorAll('[data-theme-option]').forEach(b=>b.classList.toggle('active',b.dataset.themeOption===key));
 }
 function openThemePanel(){document.querySelector('#themePanel')?.classList.add('open');document.querySelector('#themeOverlay')?.classList.add('show')}
