@@ -280,3 +280,6 @@ button,a{touch-action:manipulation}
 @media(orientation:landscape){.chips{display:flex!important;flex-wrap:wrap!important;overflow:visible!important;max-height:none!important;gap:8px!important;padding:14px 0!important}.chip{flex:0 0 auto}.content{padding-top:20px!important}.bottom-nav{height:54px!important}.main{padding-bottom:76px!important}}
 
 .experimental-toggle{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--muted);cursor:pointer}.experimental-toggle input{accent-color:var(--accent)}
+
+/* Keep labels visible in the compact landscape navigation bar. */
+.bottom-nav a{min-height:0!important;padding:2px 3px!important}.bottom-nav a .svg-icon,.bottom-nav a span{flex-shrink:0}.bottom-nav a span{line-height:1.2!important}
