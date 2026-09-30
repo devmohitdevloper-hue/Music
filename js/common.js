@@ -72,7 +72,7 @@ const TMDB={
   return Promise.allSettled([this.get("/discover/movie",india),this.get("/discover/movie",base)]).then(([a,b])=>({items:mergeIndiaFirst(quality(a.status==="fulfilled"?(a.value.results||[]):[]),quality(b.status==="fulfilled"?(b.value.results||[]):[]),24),page,totalPages:Math.max(a.status==="fulfilled"?a.value.total_pages||1:1,b.status==="fulfilled"?b.value.total_pages||1:1)})).then(x=>x.items.length?x:{items:local(),page,totalPages:1}).catch(()=>({items:local(),page,totalPages:1}))},
  trendingMovies(page=1){return this.get("/trending/movie/week",{page,include_adult:"false"}).then(x=>({items:x.results||[],page:x.page||page,totalPages:x.total_pages||1})).catch(()=>({items:[],page,totalPages:1}))},
  topRatedMovies(page=1){return this.get("/movie/top_rated",{page,region:REGION,include_adult:"false"}).then(x=>({items:x.results||[],page:x.page||page,totalPages:x.total_pages||1})).catch(()=>({items:[],page,totalPages:1}))},
- series(category,q="",page=1){const g={Drama:18,Comedy:35,Crime:80,Mystery:9648,"Sci-Fi":10765,Documentary:99,Fantasy:10759};const fallback=FALLBACK_CATALOG.series;const local=()=>{let r=fallback.slice();if(q){const z=q.toLowerCase();r=r.filter(x=>(x.name||"").toLowerCase().includes(z))}return r};
+ series(category,q="",page=1){const g={Drama:18,Comedy:35,Crime:80,Mystery:9648,"Sci-Fi":10765,Documentary:99,Fantasy:10765};const fallback=FALLBACK_CATALOG.series;const local=()=>{let r=fallback.slice();if(q){const z=q.toLowerCase();r=r.filter(x=>(x.name||"").toLowerCase().includes(z))}return r};
   if(q)return this.get("/search/tv",{query:q,page,include_adult:"false",watch_region:REGION}).then(x=>({items:(x.results||[]).sort((a,b)=>indiaScore(b)-indiaScore(a)),page:x.page||page,totalPages:x.total_pages||1})).catch(()=>({items:page===1?local():[],page,totalPages:1}));
   const base={page,sort_by:"vote_average.desc","vote_count.gte":100,include_adult:"false",watch_region:REGION};if(g[category])base.with_genres=g[category];const hindi={...base,with_origin_country:"IN",with_original_language:"hi"};const hollywood={...base,with_origin_country:"US"};const quality=list=>list.filter(x=>(x.vote_average||0)>=6.5&&(x.vote_count||0)>=100);
   return Promise.allSettled([this.get("/discover/tv",hindi),this.get("/discover/tv",hollywood)]).then(([a,b])=>({items:mergeIndiaFirst(quality(a.status==="fulfilled"?(a.value.results||[]):[]),quality(b.status==="fulfilled"?(b.value.results||[]):[]),24),page,totalPages:Math.max(a.status==="fulfilled"?a.value.total_pages||1:1,b.status==="fulfilled"?b.value.total_pages||1:1)})).then(x=>x.items.length?x:{items:local(),page,totalPages:1}).catch(()=>({items:local(),page,totalPages:1}))},
@@ -124,7 +124,12 @@ function wireNav(active){
     document.body.classList.toggle("sidebar-open",!!open);
     m?.setAttribute("aria-expanded",String(!!open));
     s.setAttribute("aria-hidden",String(!open));
+    s.inert=!open;
+    document.querySelector(".main")?.toggleAttribute("inert",!!open);
+    document.querySelector(".bottom-nav")?.toggleAttribute("inert",!!open);
+    if(open)c?.focus();else if(s.contains(document.activeElement))m?.focus();
   };
+  setOpen(false);
   window.MovieSansarUI={setSidebar:setOpen,openSidebar:()=>setOpen(true),closeSidebar:()=>setOpen(false)};
   if(m)m.onclick=e=>{e.preventDefault();e.stopPropagation();setOpen(!s.classList.contains("open"))};
   if(c)c.onclick=e=>{e.preventDefault();setOpen(false)};
@@ -189,15 +194,17 @@ function applyTheme(key){
  let faviconLink=document.querySelector('link[data-theme-favicon]'); if(!faviconLink){faviconLink=document.createElement('link');faviconLink.rel='icon';faviconLink.type='image/svg+xml';faviconLink.dataset.themeFavicon='1';document.head.appendChild(faviconLink)}
  const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="${t.accent}"/><stop offset="1" stop-color="${t.accent2}"/></linearGradient></defs><rect width="64" height="64" rx="18" fill="${t.bg}"/><rect x="6" y="6" width="52" height="52" rx="15" fill="url(#g)"/><text x="32" y="41" text-anchor="middle" font-family="Arial,sans-serif" font-size="29" font-weight="900" fill="#fff">✦</text></svg>`;
  faviconLink.href='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+ if(typeof applyAppearance==='function')applyAppearance();
  localStorage.setItem('moviesansar-theme',key);
  window.dispatchEvent(new CustomEvent('moviesansar:theme',{detail:{accent:t.accent}}));
  document.querySelectorAll('[data-theme-option]').forEach(b=>b.classList.toggle('active',b.dataset.themeOption===key));
 }
-function openThemePanel(){document.querySelector('#themePanel')?.classList.add('open');document.querySelector('#themeOverlay')?.classList.add('show')}
+function openThemePanel(){window.MovieSansarUI?.closeSidebar();document.querySelector('#themePanel')?.classList.add('open');document.querySelector('#themeOverlay')?.classList.add('show')}
 function closeThemePanel(){document.querySelector('#themePanel')?.classList.remove('open');document.querySelector('#themeOverlay')?.classList.remove('show')}
-function themePanelHTML(){return `<div class="theme-overlay" id="themeOverlay"></div><aside class="theme-panel" id="themePanel"><div class="theme-head"><div><b>Theme Studio</b><small>Customize the whole Movie Sansar</small></div><button id="themeClose" aria-label="Close theme settings">${icon("close")}</button></div><div class="theme-section-title">CHOOSE A THEME</div><div class="theme-grid">${Object.entries(THEMES).map(([key,t])=>`<button class="theme-option" data-theme-option="${key}" style="--sw1:${t.accent};--sw2:${t.accent2}"><span class="theme-swatch"><i></i><i></i></span><span><b>${t.name}</b><small>${icon(t.icon)} Accent + app icon</small></span><em>✓</em></button>`).join('')}</div><div class="theme-note">Theme, accent colors, logo and browser/app icon are saved automatically on this device. Created by Mohit Mishra.</div></aside>`}
+function themePanelHTML(){return `<div class="theme-overlay" id="themeOverlay"></div><aside class="theme-panel" id="themePanel"><div class="theme-head"><div><b>Theme Studio</b><small>Customize the whole Movie Sansar</small></div><button id="themeClose" aria-label="Close theme settings">${icon("close")}</button></div>${typeof appearanceHTML==='function'?appearanceHTML():''}<div class="theme-section-title">ACCENT COLOR</div><div class="theme-grid">${Object.entries(THEMES).map(([key,t])=>`<button class="theme-option" data-theme-option="${key}" style="--sw1:${t.accent};--sw2:${t.accent2}"><span class="theme-swatch"><i></i><i></i></span><span><b>${t.name}</b><small>${icon(t.icon)} Accent + app icon</small></span><em>✓</em></button>`).join('')}</div><div class="theme-note">Theme, accent colors, logo and browser/app icon are saved automatically on this device. Created by Mohit Mishra.</div></aside>`}
 function initTheme(){
  applyTheme(localStorage.getItem('moviesansar-theme')||'aurora');
+ if(typeof initAppearance==='function')initAppearance();
  document.addEventListener('click',e=>{
    const theme=e.target.closest?.('#themeSettings,#themeTopControl'); if(theme){e.preventDefault();openThemePanel();return}
    if(e.target.closest?.('#themeClose,#themeOverlay')){e.preventDefault();closeThemePanel();return}
@@ -213,6 +220,7 @@ function shell(section,content){
  return `<div class="app">
  <aside class="sidebar" id="sidebar" aria-hidden="false">
   <div class="brand"><div class="logo">${icon("spark")}</div><div class="brand-copy"><b>MOVIE SANSAR</b><small>Movies • Web Series</small></div><button class="side-close" id="sideClose" aria-label="Close menu">${icon("close")}</button></div>
+  <div class="side-heading">${sectionName} categories</div><div class="category-list" aria-label="Categories">${categoryButtons}</div>
   <div class="utility">
    <a href="#" data-action="library">${icon("library")}<span>My Library</span></a>
    <a href="#" data-action="recent">${icon("recent")}<span>Recently Added</span></a>
