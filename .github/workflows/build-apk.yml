@@ -38,12 +38,13 @@ jobs:
           npx playwright install --with-deps chromium
           node tests/browser.cjs
           node tests/appearance.cjs
+          node tests/search.cjs
       - name: Check live provider integration
         run: node tests/live.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: Movie-Sansar-v11-Layout-Checks
+          name: Movie-Sansar-v12-Layout-Checks
           path: qa/
           if-no-files-found: ignore
       - name: Prepare persistent debug signing key
@@ -66,6 +67,6 @@ jobs:
           PYCODE
       - uses: actions/upload-artifact@v4
         with:
-          name: Movie-Sansar-v11-APK
+          name: Movie-Sansar-v12-APK
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error

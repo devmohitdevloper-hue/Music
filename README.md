@@ -1,3 +1,9 @@
+# Movie Sansar v12
+
+Dedicated search page accessible from the bottom Search button, with glass enabled or disabled. Catalog headers no longer contain search fields. Search includes All/Movies/Web Series, genre filters, mixed result pagination, retry, stale-response protection, and locally saved submitted search history (20 unique entries; per-entry delete and clear all). History is text-escaped and preserved on update. The player opens the same search page.
+
+Glass uses more transparent backdrop sampling, edge highlights, press feedback and a compact active-tab/search layout when scrolling down; scrolling up or tapping the compact tab restores navigation. Reduced motion disables automatic folding and transitions. Reduced blur keeps opaque surfaces. Reference: user-provided screenshots and 15-second screen recording; web treatment, not the BitChord native refractive shader.
+
 # Movie Sansar v11
 
 v11 repairs the category drawer: category buttons were built but omitted from the shell. The drawer now covers the header, closes after selecting a category, and keeps the background inert. Movie/TV category filters and retry states are checked by browser tests.

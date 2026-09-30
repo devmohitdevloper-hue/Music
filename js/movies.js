@@ -10,7 +10,7 @@ function pageHTML(){return shell(SECTION,`<header class="topbar">
 <button class="mobile-menu" id="menu" type="button" aria-label="Open navigation" aria-expanded="false">${icon("menu")}</button>
 <a class="top-brand" href="movies.html" aria-label="Movie Sansar home"><span class="top-brand-logo">${icon("spark")}</span><span class="top-brand-name">Movie Sansar</span></a>
 <div class="crumb"><b>/</b><strong>${LABEL}</strong></div>
-<div class="search" role="search"><span class="search-icon">${icon("search")}</span><input id="search" placeholder="Search ${SECTION==="movies"?"movies":"web series"}..." autocomplete="off" enterkeyhint="search"><button id="searchBtn" type="button" aria-label="Search">${icon("arrow")}</button></div>
+
 <button class="profile" type="button" aria-label="Profile">MV</button></header>
 <section class="hero" id="hero"><div class="hero-content"><div class="eyebrow" id="heroEyebrow">${LABEL.toUpperCase()} • LIVE API</div><h1 id="heroTitle">Loading ${LABEL}…</h1><p id="heroText">Fetching trending and top-rated titles…</p><div class="hero-actions"><button class="btn primary" id="explore" type="button">${icon("play")}<span>Explore ${LABEL}</span></button></div><div class="hero-dots" id="heroDots"></div></div></section>
 <section class="banner-strip-section"><div class="banner-strip-head"><span class="kicker">TRENDING + TOP RATED ${LABEL.toUpperCase()}</span></div><div class="banner-strip" id="bannerStrip"></div></section>
@@ -64,9 +64,9 @@ async function load(cat=activeCategory,q="",force=false){
  if(!seenIds.size){clearInterval(heroTimer);document.getElementById("heroTitle").textContent=LABEL;document.getElementById("heroText").textContent="Search or retry when your connection is available."}
  }catch(e){if(token!==requestId)return;document.getElementById("sub").textContent="Catalog unavailable. Check your connection.";if(!seenIds.size){document.getElementById("grid").innerHTML='<div class="empty">Could not load this category.<button class="btn secondary" id="retryCatalog">Retry</button></div>';document.getElementById("retryCatalog").onclick=()=>load(cat,q,true)}}
 }
-function chooseCategory(cat){window.MovieSansarUI?.closeSidebar();const valid=CATS.includes(cat)?cat:CATS[0];document.getElementById("search").value="";load(valid,"")}
+function chooseCategory(cat){window.MovieSansarUI?.closeSidebar();const valid=CATS.includes(cat)?cat:CATS[0];load(valid,"")}
 document.addEventListener("click",e=>{const b=e.target.closest("[data-category],[data-chip]");if(!b||!document.body.contains(b))return;e.preventDefault();e.stopPropagation();chooseCategory(b.dataset.category||b.dataset.chip)},{passive:false});
-const searchInput=document.getElementById("search"),searchBtn=document.getElementById("searchBtn");let searchTimer=0;function runSearch(){clearTimeout(searchTimer);load(activeCategory,searchInput.value.trim())}searchInput.addEventListener("input",()=>{clearTimeout(searchTimer);const q=searchInput.value.trim();searchTimer=setTimeout(()=>load(activeCategory,q),q?220:100)});searchInput.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();runSearch()}});searchBtn.addEventListener("click",runSearch);document.getElementById("explore").addEventListener("click",()=>document.getElementById("content")?.scrollIntoView({behavior:"smooth",block:"start"}));
+document.getElementById("explore").addEventListener("click",()=>document.getElementById("content")?.scrollIntoView({behavior:"smooth",block:"start"}));
 const sentinel=document.getElementById("loadMoreSentinel");if("IntersectionObserver" in window)new IntersectionObserver(es=>{if(es.some(e=>e.isIntersecting))loadMore()},{rootMargin:"250px 0px"}).observe(sentinel);else window.addEventListener("scroll",()=>{if(innerHeight+scrollY>=document.body.offsetHeight-1200)loadMore()},{passive:true});
 document.addEventListener("visibilitychange",()=>{if(document.hidden)clearInterval(heroTimer);else resetHeroTimer()});
 window.addEventListener('moviesansar:appearance',resetHeroTimer);

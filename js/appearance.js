@@ -26,8 +26,13 @@ function applyAppearance(){
 function saveAppearance(){try{localStorage.setItem('moviesansar-appearance-v11',JSON.stringify(appearance))}catch(e){}applyAppearance()}
 let appearanceInitialized=false;
 function initAppearance(){if(appearanceInitialized)return;appearanceInitialized=true;applyAppearance();
- const nav=document.querySelector('.bottom-nav');if(nav&&!document.getElementById('navSearch')){const b=document.createElement('button');b.id='navSearch';b.className='nav-search';b.type='button';b.setAttribute('aria-label','Search movies and series');b.innerHTML=icon('search');nav.after(b);b.onclick=()=>{window.MovieSansarUI?.closeSidebar();const input=document.getElementById('search');if(input){window.scrollTo({top:0,behavior:'instant'});input.focus()}else location.href='movies.html?focusSearch=1'}}
- if(new URLSearchParams(location.search).has('focusSearch'))document.getElementById('search')?.focus();
+ const nav=document.querySelector('.bottom-nav');if(nav&&!document.getElementById('navSearch')){const b=document.createElement('button');b.id='navSearch';b.className='nav-search';b.type='button';b.setAttribute('aria-label','Search movies and series');b.innerHTML=icon('search');nav.after(b);b.onclick=()=>{window.MovieSansarUI?.closeSidebar();if(location.pathname.endsWith('/search.html')){document.getElementById('catalogSearch')?.focus()}else location.href='search.html'};if(location.pathname.endsWith('/search.html'))b.setAttribute('aria-current','page')}
+ let lastScroll=scrollY,scrollPending=false;
+ window.addEventListener('scroll',()=>{if(scrollPending)return;scrollPending=true;requestAnimationFrame(()=>{const y=scrollY,delta=y-lastScroll;if(y<80||delta< -5)document.documentElement.classList.remove('nav-compact');else if(delta>8&&appearance.glass&&!appearance.reduceMotion&&!systemMotion.matches&&!location.pathname.endsWith('/search.html'))document.documentElement.classList.add('nav-compact');lastScroll=y;scrollPending=false})},{passive:true});
+ nav?.addEventListener('click',e=>{if(document.documentElement.classList.contains('nav-compact')){e.preventDefault();e.stopPropagation();document.documentElement.classList.remove('nav-compact')}},true);
+ nav?.addEventListener('focusin',()=>document.documentElement.classList.remove('nav-compact'));
+ window.addEventListener('moviesansar:appearance',()=>document.documentElement.classList.remove('nav-compact'));
+
  document.addEventListener('change',e=>{const key=e.target.dataset?.appearance;if(key in APPEARANCE_DEFAULTS){appearance[key]=e.target.checked;saveAppearance()}});
  document.addEventListener('click',e=>{const mode=e.target.closest('[data-mode]');if(mode){appearance.mode=mode.dataset.mode;saveAppearance()}if(e.target.closest('#appearanceReset')){appearance={...APPEARANCE_DEFAULTS};saveAppearance()}});
  systemDark.addEventListener('change',applyAppearance);systemMotion.addEventListener('change',applyAppearance);
