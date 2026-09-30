@@ -1,3 +1,11 @@
+# Movie Sansar v11
+
+v11 repairs the category drawer: category buttons were built but omitted from the shell. The drawer now covers the header, closes after selecting a category, and keeps the background inert. Movie/TV category filters and retry states are checked by browser tests.
+
+Appearance settings: System/Light/Dark, reduced animation, reduced dynamic blur, Liquid Glass, full-width featured artwork, mesh gradient, and automatic artwork rotation. Preferences persist across pages and restarts. Glass adds a pill navigation bar and a working circular search button. Reduced blur retains the shape with solid fills; reduced motion stops gradients and artwork rotation. This is an independently implemented CSS backdrop treatment inspired by the supplied BitChord reference, not its native Android refractive shader. Spotify Canvas and lyrics settings are not applicable to this movie app and are not exposed as nonfunctional controls.
+
+Validation: existing playback/history/episode regression suite plus appearance checks across phone portrait, phone landscape and tablet; real provider checks run separately. No physical Android-device test is claimed. The v11 APK uses the existing update signing key.
+
 # Movie Sansar v10
 
 Android 8+ app for the Movies and Web Series interface, with cached TMDB metadata and local WebView assets.
