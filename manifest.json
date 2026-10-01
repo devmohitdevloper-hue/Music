@@ -1,11 +1,11 @@
 {
-  "name": "QUD Movies \u2014 Movies & Series",
-  "short_name": "QUD Movies",
+  "name": "KUD Movies \u2014 Movies & Series",
+  "short_name": "KUD Movies",
   "start_url": "movies.html",
   "display": "standalone",
   "background_color": "#07090e",
   "theme_color": "#07090e",
-  "description": "QUD Movies entertainment hub by Mohit Mishra.",
+  "description": "KUD Movies entertainment hub by Mohit Mishra.",
   "icons": [
     {
       "src": "icon.svg",

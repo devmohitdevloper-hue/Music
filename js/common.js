@@ -170,7 +170,7 @@ const ICONS={
  spark:`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 1.5 5.5L19 10l-5.5 1.5L12 17l-1.5-5.5L5 10l5.5-1.5L12 3Z"/></svg>`,
  flag:`<svg viewBox="0 0 24 16" aria-hidden="true"><path fill="#f58220" d="M0 0h24v5.33H0z"/><path fill="#fff" d="M0 5.33h24v5.34H0z"/><path fill="#138808" d="M0 10.67h24V16H0z"/><circle cx="12" cy="8" r="2" fill="none" stroke="#1a5dab" stroke-width=".7"/></svg>`
 };
-function brandMark(){return `<svg class="qud-mark" viewBox="0 0 108 108" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle class="qud-ring" cx="51" cy="50" r="26" fill="none" stroke="#35e0ca" stroke-width="9"/><path class="qud-tail" d="M68 68L84 84" fill="none" stroke="#9b7aff" stroke-width="11" stroke-linecap="round"/><path class="qud-play" d="M45 36L65 50L45 64Z" fill="#ffffff" stroke-linejoin="round"/></svg>`}
+function brandMark(){return `<svg class="kud-mark" viewBox="0 0 108 108" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path class="kud-stem" d="M30 28V80M32 54L65 28" fill="none" stroke="#35e0ca" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><path class="kud-tail" d="M34 53L66 80" fill="none" stroke="#9b7aff" stroke-width="11" stroke-linecap="round"/><path class="kud-play" d="M70 43L87 54L70 65Z" fill="#ffffff" stroke-linejoin="round"/></svg>`}
 function icon(name,cls=""){return `<span class="svg-icon ${cls}" aria-hidden="true">${ICONS[name]||ICONS.spark}</span>`}
 
 /* ===================== Global Theme System ===================== */
@@ -202,7 +202,7 @@ function applyTheme(key){
 }
 function openThemePanel(){window.MovieSansarUI?.closeSidebar();document.querySelector('#themePanel')?.classList.add('open');document.querySelector('#themeOverlay')?.classList.add('show')}
 function closeThemePanel(){document.querySelector('#themePanel')?.classList.remove('open');document.querySelector('#themeOverlay')?.classList.remove('show')}
-function themePanelHTML(){return `<div class="theme-overlay" id="themeOverlay"></div><aside class="theme-panel" id="themePanel"><div class="theme-head"><div><b>Theme Studio</b><small>Customize the whole QUD Movies</small></div><button id="themeClose" aria-label="Close theme settings">${icon("close")}</button></div>${typeof appearanceHTML==='function'?appearanceHTML():''}<div class="theme-section-title">ACCENT COLOR</div><div class="theme-grid">${Object.entries(THEMES).map(([key,t])=>`<button class="theme-option" data-theme-option="${key}" style="--sw1:${t.accent};--sw2:${t.accent2}"><span class="theme-swatch"><i></i><i></i></span><span><b>${t.name}</b><small>${icon(t.icon)} App accent</small></span><em>✓</em></button>`).join('')}</div><div class="theme-note">Your appearance preferences are saved on this device. QUD Movies • Part of QUD.</div></aside>`}
+function themePanelHTML(){return `<div class="theme-overlay" id="themeOverlay"></div><aside class="theme-panel" id="themePanel"><div class="theme-head"><div><b>Theme Studio</b><small>Customize the whole KUD Movies</small></div><button id="themeClose" aria-label="Close theme settings">${icon("close")}</button></div>${typeof appearanceHTML==='function'?appearanceHTML():''}<div class="theme-section-title">ACCENT COLOR</div><div class="theme-grid">${Object.entries(THEMES).map(([key,t])=>`<button class="theme-option" data-theme-option="${key}" style="--sw1:${t.accent};--sw2:${t.accent2}"><span class="theme-swatch"><i></i><i></i></span><span><b>${t.name}</b><small>${icon(t.icon)} App accent</small></span><em>✓</em></button>`).join('')}</div><div class="theme-note">Your appearance preferences are saved on this device. KUD Movies • Part of KUD.</div></aside>`}
 function initTheme(){
  applyTheme(localStorage.getItem('moviesansar-theme')||'aurora');
  if(typeof initAppearance==='function')initAppearance();
@@ -216,11 +216,11 @@ function initTheme(){
 function shell(section,content){
  const cats=section==="movies"?["All Movies","Action","Comedy","Drama","Thriller","Romance","Sci-Fi","Animation","Adventure","Horror"]:
  ["All Series","Drama","Comedy","Crime","Mystery","Sci-Fi","Documentary","Fantasy"];
- const sectionName=section==="movies"?"QUD Movies":"QUD Series";
+ const sectionName=section==="movies"?"KUD Movies":"KUD Series";
  const categoryButtons=cats.map((c,i)=>`<button type="button" class="${i===0?'active':''}" data-category="${esc(c)}">${icon(section==='movies'?'movie':'series')}<span>${esc(c)}</span></button>`).join("");
  return `<div class="app">
  <aside class="sidebar" id="sidebar" aria-hidden="false">
-  <div class="brand"><div class="logo">${brandMark()}</div><div class="brand-copy"><b>QUD MOVIES</b><small>Movies • Web Series</small></div><button class="side-close" id="sideClose" aria-label="Close menu">${icon("close")}</button></div>
+  <div class="brand"><div class="logo">${brandMark()}</div><div class="brand-copy"><b>KUD MOVIES</b><small>Movies • Web Series</small></div><button class="side-close" id="sideClose" aria-label="Close menu">${icon("close")}</button></div>
   <div class="side-heading">${sectionName} categories</div><div class="category-list" aria-label="Categories">${categoryButtons}</div>
   <div class="utility">
    <a href="#" data-action="library">${icon("library")}<span>My Library</span></a>
@@ -229,7 +229,7 @@ function shell(section,content){
    <a href="#" id="themeSettings">${icon("theme")}<span>Theme Studio</span></a>
   </div>
  </aside>
- <main class="main">${content}<footer class="site-footer"><div>© ${new Date().getFullYear()} <strong>QUD Movies</strong> • Created by <strong>Mohit Mishra</strong></div><a href="#" data-portfolio-link>View Portfolio ↗</a></footer></main>
+ <main class="main">${content}<footer class="site-footer"><div>© ${new Date().getFullYear()} <strong>KUD Movies</strong> • Created by <strong>Mohit Mishra</strong></div><a href="#" data-portfolio-link>View Portfolio ↗</a></footer></main>
  </div>
  <div class="sidebar-overlay" id="overlay"></div>
  ${bottomNavHTML(section)}

@@ -1,6 +1,6 @@
-# QUD Movies v13
+# KUD Movies v14
 
-Rebrands the existing application as QUD Movies. New Q/play symbol across the Android adaptive launcher icon, web icon, headers, drawer and player. The app ID, signing key and local data keys remain compatible with v12, preserving the installed app and its history/settings. Native launcher icons are static; in-app logo press/hover feedback respects reduced motion.
+Rebrands the existing application as KUD Movies. New K/play symbol across the Android adaptive launcher icon, web icon, headers, drawer and player. The app ID, signing key and local data keys remain compatible with v12, preserving the installed app and its history/settings. Native launcher icons are static; in-app logo press/hover feedback respects reduced motion.
 
 # Movie Sansar v12
 
