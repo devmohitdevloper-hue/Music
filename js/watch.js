@@ -23,7 +23,7 @@ window.addEventListener('message',event=>{
 const app=document.getElementById("app");
 
 app.innerHTML=`<div class="app"><main class="main"><div class="watch-page">
-<div class="watch-top"><div class="watch-brand"><a href="movies.html" aria-label="Movie Sansar home"><span class="top-brand-logo">${icon("spark")}</span><span class="top-brand-name">Movie Sansar</span></a></div><button class="back-btn" id="back">${icon("back")}<span>Back</span></button><div class="watch-tools"><button class="back-btn" id="themeSettings">${icon("theme")}<span>Theme</span></button><span class="badge-pill"><span class="badge-dot"></span><span>Player</span></span></div></div>
+<div class="watch-top"><div class="watch-brand"><a href="movies.html" aria-label="QUD Movies home"><span class="top-brand-logo">${brandMark()}</span><span class="top-brand-name">QUD Movies</span></a></div><button class="back-btn" id="back">${icon("back")}<span>Back</span></button><div class="watch-tools"><button class="back-btn" id="themeSettings">${icon("theme")}<span>Theme</span></button><span class="badge-pill"><span class="badge-dot"></span><span>Player</span></span></div></div>
 <div class="controls-bar"><div class="controls-group"><span class="controls-label">Playback</span>
 ${TYPE==="tv"?`<select class="server-select episode-select" id="topSeason" aria-label="Season"></select><select class="server-select episode-select" id="topEpisode" aria-label="Episode"></select>`:""}
 </div><div class="controls-group"><span class="controls-label">Zoom</span><button class="zoom-btn active" data-z="fit">Fit</button><button class="zoom-btn" data-z="fill">1x</button><button class="zoom-btn" data-z="ultra">Ultra</button></div>
@@ -31,7 +31,7 @@ ${TYPE==="tv"?`<select class="server-select episode-select" id="topSeason" aria-
 <div class="player-wrap"><iframe id="frame" allow="accelerometer; autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen loading="eager" referrerpolicy="no-referrer"></iframe></div>
 <p id="playerStatus" role="status" style="color:var(--muted);font-size:12px"></p><div class="info-card"><div class="info-top"><h1 class="info-title" id="title">Loading…</h1><div class="info-badges"><span class="info-badge rating" id="rating">${icon("spark")} <span>—</span></span><span class="info-badge" id="year">—</span></div></div><p class="info-overview" id="overview">Loading description…</p></div>
 <div class="episodes-card" id="episodes" style="display:none"><div class="episodes-head"><h3>Select Season & Episode</h3><div class="season-tabs" id="seasons"></div></div><div class="episode-grid" id="episodeGrid"></div><div class="now-playing-strip" id="nowPlaying"></div></div>
-<h3 class="related-title">More Like This</h3><div class="grid" id="related"></div><footer class="site-footer"><div>© ${new Date().getFullYear()} <strong>Movie Sansar</strong> • Created by <strong>Mohit Mishra</strong></div></footer></div></main></div>${bottomNavHTML(TYPE==="movie"?"movies":"series")}${libraryPanelHTML()}${themePanelHTML()}`;
+<h3 class="related-title">More Like This</h3><div class="grid" id="related"></div><footer class="site-footer"><div>© ${new Date().getFullYear()} <strong>QUD Movies</strong> • Created by <strong>Mohit Mishra</strong></div></footer></div></main></div>${bottomNavHTML(TYPE==="movie"?"movies":"series")}${libraryPanelHTML()}${themePanelHTML()}`;
 
 initTheme();
 document.querySelector('[data-action="library"]').onclick=e=>{e.preventDefault();openLibrary()};
@@ -92,7 +92,7 @@ async function loadDetails(){
 }
 async function applyDetails(d,offline=false){
  title=d.title||d.name||"Untitled";recordVisit();
- document.title="Movie Sansar — "+title;
+ document.title="QUD Movies — "+title;
  document.getElementById("title").textContent=title;
  document.getElementById("rating").innerHTML=`${icon("spark")} <span>${d.vote_average?Number(d.vote_average).toFixed(1):"N/A"}</span>`;
  document.getElementById("year").textContent=(d.release_date||d.first_air_date||"").slice(0,4)||"N/A";

@@ -1,3 +1,7 @@
+# QUD Movies v13
+
+Rebrands the existing application as QUD Movies. New Q/play symbol across the Android adaptive launcher icon, web icon, headers, drawer and player. The app ID, signing key and local data keys remain compatible with v12, preserving the installed app and its history/settings. Native launcher icons are static; in-app logo press/hover feedback respects reduced motion.
+
 # Movie Sansar v12
 
 Dedicated search page accessible from the bottom Search button, with glass enabled or disabled. Catalog headers no longer contain search fields. Search includes All/Movies/Web Series, genre filters, mixed result pagination, retry, stale-response protection, and locally saved submitted search history (20 unique entries; per-entry delete and clear all). History is text-escaped and preserved on update. The player opens the same search page.

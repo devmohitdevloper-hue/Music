@@ -1,5 +1,5 @@
 const SECTION=window.PAGE_SECTION||"movies";
-const LABEL=SECTION==="movies"?"Movie Sansar":"Web-Series Sansar";
+const LABEL=SECTION==="movies"?"QUD Movies":"QUD Series";
 const TYPE=SECTION==="movies"?"movie":"tv";
 const CATS=SECTION==="movies"?["All Movies","Action","Comedy","Drama","Thriller","Romance","Sci-Fi","Animation","Adventure","Horror"]:["All Series","Drama","Comedy","Crime","Mystery","Sci-Fi","Documentary","Fantasy"];
 const app=document.getElementById("app");
@@ -8,10 +8,10 @@ const seenIds=new Set();
 
 function pageHTML(){return shell(SECTION,`<header class="topbar">
 <button class="mobile-menu" id="menu" type="button" aria-label="Open navigation" aria-expanded="false">${icon("menu")}</button>
-<a class="top-brand" href="movies.html" aria-label="Movie Sansar home"><span class="top-brand-logo">${icon("spark")}</span><span class="top-brand-name">Movie Sansar</span></a>
+<a class="top-brand" href="movies.html" aria-label="QUD Movies home"><span class="top-brand-logo">${brandMark()}</span><span class="top-brand-name">QUD Movies</span></a>
 <div class="crumb"><b>/</b><strong>${LABEL}</strong></div>
 
-<button class="profile" type="button" aria-label="Profile">MV</button></header>
+<button class="profile" type="button" aria-label="Profile">QUD</button></header>
 <section class="hero" id="hero"><div class="hero-content"><div class="eyebrow" id="heroEyebrow">${LABEL.toUpperCase()} • LIVE API</div><h1 id="heroTitle">Loading ${LABEL}…</h1><p id="heroText">Fetching trending and top-rated titles…</p><div class="hero-actions"><button class="btn primary" id="explore" type="button">${icon("play")}<span>Explore ${LABEL}</span></button></div><div class="hero-dots" id="heroDots"></div></div></section>
 <section class="banner-strip-section"><div class="banner-strip-head"><span class="kicker">TRENDING + TOP RATED ${LABEL.toUpperCase()}</span></div><div class="banner-strip" id="bannerStrip"></div></section>
 <section class="content" id="content"><div class="heading"><div><div class="kicker">${LABEL.toUpperCase()} LIBRARY</div><h2 id="title">${CATS[0]}</h2><p id="sub">Trending first • top-rated next • infinite scroll</p></div></div><div class="chips" id="chips">${CATS.map((c,i)=>`<button class="chip ${i===0?"active":""}" type="button" data-chip="${esc(c)}">${esc(c)}</button>`).join("")}</div><div class="grid" id="grid"></div><div id="loadMoreSentinel" style="height:1px"></div><div id="loadMoreStatus" style="min-height:30px;text-align:center;color:var(--muted);font-size:11px"></div></section>`)}

@@ -1,4 +1,4 @@
-name: Build Movie Sansar APK
+name: Build QUD Movies APK
 on:
   workflow_dispatch:
   push:
@@ -39,12 +39,13 @@ jobs:
           node tests/browser.cjs
           node tests/appearance.cjs
           node tests/search.cjs
+          node tests/brand.cjs
       - name: Check live provider integration
         run: node tests/live.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: Movie-Sansar-v12-Layout-Checks
+          name: QUD-Movies-v13-Layout-Checks
           path: qa/
           if-no-files-found: ignore
       - name: Prepare persistent debug signing key
@@ -67,6 +68,6 @@ jobs:
           PYCODE
       - uses: actions/upload-artifact@v4
         with:
-          name: Movie-Sansar-v12-APK
+          name: QUD-Movies-v13-APK
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
