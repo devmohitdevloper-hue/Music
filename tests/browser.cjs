@@ -40,7 +40,7 @@ const server=http.createServer((req,res)=>{const f=path.join(root,new URL(req.ur
  await page.waitForFunction(()=>document.querySelector('#frame').src.includes('/1/3?'));
  assert.equal(new URL(await page.locator('#frame').getAttribute('src')).searchParams.get('color'),'#ef4444');
  assert.notEqual(await page.locator('#frame').getAttribute('name'),frameName,'episode switch must replace browsing context');
- frame=page.frames().find(f=>f.url().includes('/1/3?'));await frame.waitForSelector('video');
+ await page.frameLocator('#frame').locator('video').waitFor();frame=page.frames().find(f=>f.url().includes('/1/3?'));assert(frame,'episode 3 frame must navigate');
  const before=frame.url();await frame.locator('#redirect').click();await frame.locator('#popup').click();await page.waitForTimeout(150);
  assert.equal(frame.url(),before);assert.equal(page.context().pages().length,1);
  await mockVideo(frame);await frame.waitForTimeout(100);assert.equal(await frame.evaluate(()=>window.testTime),0,'new episode must not inherit old position');

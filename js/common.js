@@ -193,7 +193,7 @@ function applyTheme(key){
  document.querySelectorAll(".logo,.top-brand-logo").forEach(el=>{el.innerHTML=brandMark();el.style.background="#0b1020"});
  const meta=document.querySelector('meta[name="theme-color"]'); if(meta) meta.content=t.bg;
  let faviconLink=document.querySelector('link[data-theme-favicon]'); if(!faviconLink){faviconLink=document.createElement('link');faviconLink.rel='icon';faviconLink.type='image/svg+xml';faviconLink.dataset.themeFavicon='1';document.head.appendChild(faviconLink)}
- const svg=brandMark().replace('<svg ', '<svg ').replace('aria-hidden="true"','').replace('><circle','><rect width="108" height="108" rx="26" fill="#0b1020"/><circle');
+ const svg=brandMark().replace('<svg ', '<svg ').replace('aria-hidden="true"','').replace('><path','><rect width="108" height="108" rx="26" fill="#0b1020"/><path');
  faviconLink.href='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
  if(typeof applyAppearance==='function')applyAppearance();
  localStorage.setItem('moviesansar-theme',key);
